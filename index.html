@@ -1,16 +1,1128 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FUTCAREER — Modo Carreira</title>
-  <link rel="stylesheet" href="css/style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FUTCAREER — Modo Carreira</title>
+<meta name="description" content="Jogo de carreira de futebol em um unico arquivo HTML.">
+<style>
+/* ==========================================================================
+   FUTCAREER — identidade visual
+   Paleta: gramado a noite sob holofotes.
+   --night        #0A1620   fundo principal (tunel do estadio)
+   --pitch        #163524   painel principal (gramado escuro)
+   --pitch-light  #1F5138   painel secundario / hover
+   --floodlight   #F2C744   destaque, botao principal, OVR
+   --chalk        #EDF3EE   texto principal sobre fundo escuro
+   --card-red     #E4572E   avisos, encerrar carreira
+   ========================================================================== */
+
+:root {
+  --night: #0A1620;
+  --pitch: #163524;
+  --pitch-light: #1F5138;
+  --floodlight: #F2C744;
+  --chalk: #EDF3EE;
+  --card-red: #E4572E;
+  --linha: rgba(237, 243, 238, 0.14);
+  --fonte-titulo: ui-sans-serif, "Segoe UI", Arial, sans-serif;
+  --fonte-numero: ui-monospace, "SFMono-Regular", Consolas, monospace;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  min-height: 100%;
+  background: var(--night);
+  color: var(--chalk);
+  font-family: var(--fonte-titulo);
+  line-height: 1.45;
+}
+
+#app {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 24px 18px 60px;
+}
+
+h1, h2, h3 { font-weight: 700; margin: 0 0 12px; letter-spacing: -0.01em; }
+h2 { font-size: 1.5rem; border-bottom: 1px solid var(--linha); padding-bottom: 10px; }
+h3 { font-size: 1.05rem; color: var(--floodlight); margin-top: 22px; }
+p { margin: 0 0 8px; }
+ul { margin: 0 0 12px; padding-left: 20px; }
+.texto-apoio { color: rgba(237, 243, 238, 0.65); font-size: 0.92rem; }
+.destaque { color: var(--floodlight); font-weight: 600; }
+
+/* ---------- Tela de abertura ------------------------------------------- */
+.tela-abertura {
+  min-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  gap: 40px;
+}
+.abertura-marca .abertura-numero {
+  display: block;
+  font-family: var(--fonte-numero);
+  font-size: 4rem;
+  font-weight: 700;
+  color: var(--floodlight);
+  line-height: 1;
+}
+.abertura-marca h1 { font-size: 2.1rem; margin: 6px 0 4px; }
+.subt { color: rgba(237, 243, 238, 0.7); }
+.abertura-acoes { display: flex; flex-direction: column; gap: 12px; width: 260px; }
+
+/* ---------- Botoes ------------------------------------------------------ */
+.btn {
+  border: none;
+  border-radius: 3px;
+  padding: 12px 18px;
+  font-size: 0.98rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+}
+.btn-primario { background: var(--floodlight); color: #1A1400; }
+.btn-primario:hover { background: #ffd968; }
+.btn-secundario { background: var(--pitch-light); color: var(--chalk); border: 1px solid var(--linha); }
+.btn-secundario:hover { background: #275e42; }
+.btn-perigo { background: transparent; color: var(--card-red); border: 1px solid var(--card-red); }
+.btn-perigo:hover { background: rgba(228, 87, 46, 0.12); }
+
+/* ---------- Formulario de criacao --------------------------------------- */
+.campo { margin-bottom: 16px; display: flex; flex-direction: column; gap: 6px; }
+.campo-linha { display: flex; gap: 16px; }
+.campo-linha .campo { flex: 1; }
+label { font-size: 0.85rem; color: rgba(237, 243, 238, 0.75); }
+input[type="text"], select {
+  background: var(--pitch);
+  border: 1px solid var(--linha);
+  color: var(--chalk);
+  padding: 10px 12px;
+  border-radius: 3px;
+  font-family: inherit;
+  font-size: 0.95rem;
+}
+
+.grade-estilos { display: grid; grid-template-columns: 1fr; gap: 10px; }
+.cartao-estilo {
+  border: 1px solid var(--linha);
+  background: var(--pitch);
+  border-radius: 3px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  cursor: pointer;
+}
+.cartao-estilo input { margin-right: 8px; }
+.cartao-estilo-titulo { font-weight: 700; }
+.cartao-estilo-desc { font-size: 0.85rem; color: rgba(237, 243, 238, 0.65); }
+.cartao-estilo:has(input:checked) { border-color: var(--floodlight); background: var(--pitch-light); }
+
+#btn-confirmar-criacao { width: 100%; margin-top: 8px; }
+
+/* ---------- Cartao do jogador -------------------------------------------- */
+.cartao-jogador {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--pitch);
+  border: 1px solid var(--linha);
+  border-radius: 3px;
+  padding: 16px;
+  margin: 16px 0;
+}
+.cartao-jogador-ovr {
+  font-family: var(--fonte-numero);
+  font-size: 2.4rem;
+  font-weight: 700;
+  color: var(--floodlight);
+  min-width: 64px;
+  text-align: center;
+}
+.cartao-jogador-dados h3 { margin: 0; font-size: 1.15rem; }
+.cartao-jogador-dados p { margin: 2px 0; font-size: 0.9rem; }
+
+/* ---------- Tabela da liga ------------------------------------------------ */
+.tabela-liga {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.86rem;
+  margin: 16px 0;
+}
+.tabela-liga caption {
+  text-align: left;
+  color: rgba(237, 243, 238, 0.7);
+  font-size: 0.82rem;
+  margin-bottom: 6px;
+}
+.tabela-liga th, .tabela-liga td {
+  border-bottom: 1px solid var(--linha);
+  padding: 6px 8px;
+  text-align: center;
+  font-family: var(--fonte-numero);
+}
+.tabela-liga th:nth-child(2), .tabela-liga td:nth-child(2) { text-align: left; font-family: inherit; }
+.tabela-liga .linha-destaque { background: rgba(242, 199, 68, 0.12); }
+
+/* ---------- Barra superior no dashboard ----------------------------------- */
+.barra-topo {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: rgba(237, 243, 238, 0.7);
+  border-bottom: 1px solid var(--linha);
+  padding-bottom: 10px;
+  margin-bottom: 4px;
+}
+.marca { font-family: var(--fonte-numero); letter-spacing: 0.06em; color: var(--floodlight); }
+
+.acoes { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+
+/* ---------- Cartoes de clube (mercado) ------------------------------------ */
+.lista-clubes { display: flex; flex-direction: column; gap: 10px; margin: 16px 0; }
+.cartao-clube {
+  border: 1px solid var(--linha);
+  background: var(--pitch);
+  border-radius: 3px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.cartao-clube-topo { display: flex; justify-content: space-between; align-items: baseline; }
+.tag {
+  font-size: 0.72rem;
+  color: rgba(237, 243, 238, 0.65);
+  border: 1px solid var(--linha);
+  border-radius: 3px;
+  padding: 2px 6px;
+}
+.cartao-clube-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.82rem;
+  color: rgba(237, 243, 238, 0.75);
+  font-family: var(--fonte-numero);
+}
+
+/* ---------- Resultado / avisos --------------------------------------------- */
+.grade-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin: 18px 0;
+}
+.grade-stats div {
+  background: var(--pitch);
+  border: 1px solid var(--linha);
+  border-radius: 3px;
+  padding: 12px 6px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.grade-stats .numero {
+  font-family: var(--fonte-numero);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--floodlight);
+}
+.grade-stats span:last-child { font-size: 0.75rem; color: rgba(237, 243, 238, 0.65); }
+
+.aviso {
+  background: rgba(228, 87, 46, 0.12);
+  border: 1px solid rgba(228, 87, 46, 0.4);
+  border-radius: 3px;
+  padding: 10px 12px;
+  font-size: 0.88rem;
+}
+.aviso-campeao {
+  background: rgba(242, 199, 68, 0.14);
+  border-color: rgba(242, 199, 68, 0.5);
+}
+
+/* ---------- Responsivo ------------------------------------------------------ */
+@media (max-width: 520px) {
+  .campo-linha { flex-direction: column; gap: 16px; }
+  .grade-stats { grid-template-columns: repeat(2, 1fr); }
+  .cartao-jogador { flex-direction: column; align-items: flex-start; }
+}
+
+/* ---------- Foco visivel para acessibilidade -------------------------------- */
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible {
+  outline: 2px solid var(--floodlight);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
+</style>
 </head>
 <body>
-  <main id="app"></main>
+<main id="app"></main>
+<script>
+/* ==========================================================================
+   FUTCAREER — base de dados de ligas, clubes e nacionalidades
+   Todos os valores de "reputacao" vao de 1 a 100 e definem, de forma
+   simplificada, a forca media do elenco, o orcamento e o salario-base
+   que o clube consegue pagar. Isso NAO e uma copia de nenhum jogo — sao
+   apenas nomes de clubes e ligas reais usados como referencia de realismo.
+   ========================================================================== */
 
-  <script src="js/data.js"></script>
-  <script src="js/engine.js"></script>
-  <script src="js/app.js"></script>
+const LEAGUES = [
+  {
+    id: "BRA1",
+    nome: "Brasileirao Serie A",
+    pais: "Brasil",
+    nivel: 1,
+    clubes: [
+      { nome: "Flamengo",      reputacao: 88 },
+      { nome: "Palmeiras",     reputacao: 89 },
+      { nome: "Sao Paulo",     reputacao: 82 },
+      { nome: "Corinthians",   reputacao: 83 },
+      { nome: "Gremio",        reputacao: 79 },
+      { nome: "Internacional", reputacao: 78 },
+      { nome: "Atletico-MG",   reputacao: 80 },
+      { nome: "Fluminense",    reputacao: 77 },
+    ],
+  },
+  {
+    id: "BRA2",
+    nome: "Brasileirao Serie B",
+    pais: "Brasil",
+    nivel: 2,
+    clubes: [
+      { nome: "Vasco da Gama", reputacao: 62 },
+      { nome: "Sport Recife",  reputacao: 55 },
+      { nome: "Ceara",         reputacao: 54 },
+      { nome: "Guarani",       reputacao: 48 },
+      { nome: "Coritiba",      reputacao: 50 },
+      { nome: "Novorizontino", reputacao: 44 },
+    ],
+  },
+  {
+    id: "ENG1",
+    nome: "Premier League",
+    pais: "Inglaterra",
+    nivel: 1,
+    clubes: [
+      { nome: "Manchester City",  reputacao: 95 },
+      { nome: "Arsenal",          reputacao: 90 },
+      { nome: "Liverpool",        reputacao: 92 },
+      { nome: "Chelsea",          reputacao: 86 },
+      { nome: "Manchester United", reputacao: 85 },
+      { nome: "Tottenham",        reputacao: 83 },
+      { nome: "Newcastle",        reputacao: 80 },
+      { nome: "Aston Villa",      reputacao: 78 },
+    ],
+  },
+  {
+    id: "ESP1",
+    nome: "La Liga",
+    pais: "Espanha",
+    nivel: 1,
+    clubes: [
+      { nome: "Real Madrid",     reputacao: 96 },
+      { nome: "Barcelona",       reputacao: 93 },
+      { nome: "Atletico Madrid", reputacao: 87 },
+      { nome: "Sevilla",         reputacao: 78 },
+      { nome: "Real Sociedad",   reputacao: 76 },
+      { nome: "Villarreal",      reputacao: 77 },
+      { nome: "Athletic Bilbao", reputacao: 75 },
+      { nome: "Real Betis",      reputacao: 74 },
+    ],
+  },
+  {
+    id: "ITA1",
+    nome: "Serie A",
+    pais: "Italia",
+    nivel: 1,
+    clubes: [
+      { nome: "Inter de Milao", reputacao: 89 },
+      { nome: "AC Milan",       reputacao: 86 },
+      { nome: "Juventus",       reputacao: 87 },
+      { nome: "Napoli",         reputacao: 84 },
+      { nome: "Roma",           reputacao: 80 },
+      { nome: "Atalanta",       reputacao: 79 },
+      { nome: "Lazio",          reputacao: 77 },
+      { nome: "Fiorentina",     reputacao: 74 },
+    ],
+  },
+  {
+    id: "GER1",
+    nome: "Bundesliga",
+    pais: "Alemanha",
+    nivel: 1,
+    clubes: [
+      { nome: "Bayern de Munique",  reputacao: 93 },
+      { nome: "Borussia Dortmund",  reputacao: 85 },
+      { nome: "RB Leipzig",         reputacao: 82 },
+      { nome: "Bayer Leverkusen",   reputacao: 83 },
+      { nome: "Eintracht Frankfurt", reputacao: 76 },
+      { nome: "Wolfsburg",          reputacao: 73 },
+      { nome: "Freiburg",           reputacao: 72 },
+    ],
+  },
+  {
+    id: "FRA1",
+    nome: "Ligue 1",
+    pais: "Franca",
+    nivel: 1,
+    clubes: [
+      { nome: "Paris Saint-Germain", reputacao: 91 },
+      { nome: "Marselha",            reputacao: 78 },
+      { nome: "Lyon",                reputacao: 76 },
+      { nome: "Monaco",              reputacao: 79 },
+      { nome: "Lille",               reputacao: 75 },
+      { nome: "Rennes",              reputacao: 73 },
+      { nome: "Lens",                reputacao: 72 },
+    ],
+  },
+  {
+    id: "POR1",
+    nome: "Primeira Liga",
+    pais: "Portugal",
+    nivel: 1,
+    clubes: [
+      { nome: "Benfica",             reputacao: 82 },
+      { nome: "Porto",               reputacao: 81 },
+      { nome: "Sporting CP",         reputacao: 80 },
+      { nome: "Braga",               reputacao: 71 },
+      { nome: "Vitoria de Guimaraes", reputacao: 65 },
+    ],
+  },
+  {
+    id: "NED1",
+    nome: "Eredivisie",
+    pais: "Holanda",
+    nivel: 1,
+    clubes: [
+      { nome: "Ajax",       reputacao: 78 },
+      { nome: "PSV Eindhoven", reputacao: 79 },
+      { nome: "Feyenoord",  reputacao: 77 },
+      { nome: "AZ Alkmaar", reputacao: 68 },
+      { nome: "Twente",     reputacao: 65 },
+    ],
+  },
+  {
+    id: "USA1",
+    nome: "MLS",
+    pais: "Estados Unidos",
+    nivel: 1,
+    clubes: [
+      { nome: "Inter Miami",     reputacao: 74 },
+      { nome: "LAFC",            reputacao: 72 },
+      { nome: "LA Galaxy",       reputacao: 68 },
+      { nome: "Atlanta United",  reputacao: 66 },
+      { nome: "Seattle Sounders", reputacao: 65 },
+    ],
+  },
+  {
+    id: "MEX1",
+    nome: "Liga MX",
+    pais: "Mexico",
+    nivel: 1,
+    clubes: [
+      { nome: "Club America", reputacao: 71 },
+      { nome: "Chivas",       reputacao: 66 },
+      { nome: "Cruz Azul",    reputacao: 67 },
+      { nome: "Tigres",       reputacao: 70 },
+      { nome: "Monterrey",    reputacao: 69 },
+    ],
+  },
+];
+
+const NACIONALIDADES = [
+  "Brasil", "Argentina", "Portugal", "Espanha", "Franca", "Inglaterra",
+  "Alemanha", "Italia", "Holanda", "Belgica", "Uruguai", "Colombia",
+  "Estados Unidos", "Mexico", "Croacia", "Japao", "Nigeria", "Senegal",
+  "Marrocos", "Noruega",
+];
+
+const POSICOES = {
+  GOL: { label: "Goleiro",          pesos: { def: 0.55, fis: 0.35, pas: 0.10 } },
+  ZAG: { label: "Zagueiro",         pesos: { def: 0.50, fis: 0.30, pas: 0.20 } },
+  LAT: { label: "Lateral",          pesos: { def: 0.35, vel: 0.30, fis: 0.15, pas: 0.20 } },
+  VOL: { label: "Volante",          pesos: { def: 0.30, pas: 0.30, fis: 0.25, dri: 0.15 } },
+  MEI: { label: "Meia",             pesos: { pas: 0.35, dri: 0.30, atq: 0.20, vel: 0.15 } },
+  ATA: { label: "Atacante",         pesos: { atq: 0.45, dri: 0.25, vel: 0.20, fis: 0.10 } },
+};
+
+const ESTILOS = [
+  {
+    id: "finalizador",
+    nome: "Finalizador",
+    descricao: "Frio na hora de definir. Comeca mais forte em ATQ e VEL.",
+    bonus: { atq: 12, vel: 6, dri: 2 },
+  },
+  {
+    id: "criativo",
+    nome: "Criativo",
+    descricao: "Enxerga o jogo antes dos outros. Comeca mais forte em PAS e DRI.",
+    bonus: { pas: 10, dri: 8, atq: 2 },
+  },
+  {
+    id: "fisico",
+    nome: "Fisico",
+    descricao: "Duro na marcacao e forte no corpo a corpo. Comeca mais forte em DEF e FIS.",
+    bonus: { def: 10, fis: 10 },
+  },
+];
+
+// Nomes usados apenas para gerar jogadores adversarios genericos (nao reais)
+const NOMES_BASE = [
+  "Silva", "Santos", "Costa", "Oliveira", "Pereira", "Almeida", "Ribeiro",
+  "Carvalho", "Gomes", "Martins", "Rocha", "Dias", "Nunes", "Teixeira",
+  "Moreira", "Fernandes", "Correia", "Lopes", "Marques", "Vieira",
+];
+/* ==========================================================================
+   FUTCAREER — motor do jogo
+   Toda a logica de simulacao fica aqui. A tela (app.js) so le o estado
+   e chama estas funcoes; nao ha calculo de jogo dentro da UI.
+   ========================================================================== */
+
+const SAVE_KEY = "futcareer_save_v1";
+
+function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+function rnd(min, max) { return Math.random() * (max - min) + min; }
+function rndInt(min, max) { return Math.floor(rnd(min, max + 1)); }
+function pick(arr) { return arr[rndInt(0, arr.length - 1)]; }
+
+/* ---------- Construcao do clube (runtime) ---------------------------- */
+
+function buildClub(base, leagueId, leagueNivel) {
+  return {
+    nome: base.nome,
+    ligaId: leagueId,
+    nivel: leagueNivel,
+    reputacao: base.reputacao,
+    orcamento: Math.round(base.reputacao * rnd(0.8, 1.3) * 1_000_000),
+    pontos: 0, jogos: 0, vitorias: 0, empates: 0, derrotas: 0,
+    golsPro: 0, golsContra: 0,
+  };
+}
+
+function novoMundo() {
+  const clubes = [];
+  for (const liga of LEAGUES) {
+    for (const base of liga.clubes) {
+      clubes.push(buildClub(base, liga.id, liga.nivel));
+    }
+  }
+  return clubes;
+}
+
+function resetarTabela(clubes) {
+  for (const c of clubes) {
+    c.pontos = 0; c.jogos = 0; c.vitorias = 0; c.empates = 0; c.derrotas = 0;
+    c.golsPro = 0; c.golsContra = 0;
+  }
+}
+
+function clubesDaLiga(clubes, ligaId) {
+  return clubes.filter(c => c.ligaId === ligaId);
+}
+
+/* ---------- Criacao do jogador ----------------------------------------- */
+
+function criarJogador({ nome, nacionalidade, posicao, estiloId }) {
+  const estilo = ESTILOS.find(e => e.id === estiloId) || ESTILOS[0];
+  const base = { atq: 40, dri: 40, pas: 40, def: 40, fis: 40, vel: 40 };
+  for (const k in base) base[k] += rndInt(-4, 4);
+  for (const k in estilo.bonus) base[k] += estilo.bonus[k];
+  for (const k in base) base[k] = clamp(base[k], 20, 80);
+
+  const potencial = clamp(rndInt(65, 95), 65, 99);
+
+  // Clube inicial: um time pequeno/medio da base do futebol nacional do jogador
+  const ligaInicial = LEAGUES.find(l => l.pais === nacionalidade) || LEAGUES[1];
+
+  return {
+    nome, nacionalidade, posicao, estiloId,
+    idade: 17,
+    atributos: base,
+    potencial,
+    clubeNome: null, // definido na primeira janela
+    ligaIdPreferida: ligaInicial.id,
+    contratoAte: null,
+    salario: 0,
+    valorDeMercado: 0,
+    moral: 70,
+    aposentado: false,
+    estatisticasTemporada: statsVazias(),
+    estatisticasCarreira: statsVazias(),
+    historicoClubes: [],
+    titulos: [],
+  };
+}
+
+function statsVazias() {
+  return { jogos: 0, gols: 0, assistencias: 0, notaSoma: 0, jogosComNota: 0, clSheets: 0 };
+}
+
+function overall(jogador) {
+  const pesos = POSICOES[jogador.posicao].pesos;
+  let total = 0;
+  for (const attr in pesos) total += jogador.atributos[attr] * pesos[attr];
+  return Math.round(clamp(total, 1, 99));
+}
+
+function poderDoJogador(jogador) {
+  // Combina OVR atual com uma fracao do potencial para calcular interesse de clubes
+  return Math.round(overall(jogador) * 0.75 + jogador.potencial * 0.25);
+}
+
+function atualizarValorDeMercado(jogador) {
+  const ovr = overall(jogador);
+  const fatorIdade = jogador.idade <= 23 ? 1.4 : jogador.idade <= 29 ? 1.0 : jogador.idade <= 33 ? 0.6 : 0.3;
+  const base = Math.pow(1.18, ovr - 40) * 150000 * fatorIdade;
+  jogador.valorDeMercado = Math.round(base / 10000) * 10000;
+}
+
+/* ---------- Mercado de transferencias ----------------------------------- */
+
+function clubeAtual(estado) {
+  return estado.clubes.find(c => c.nome === estado.jogador.clubeNome);
+}
+
+function clubesInteressados(estado, incluirAtual = false) {
+  const jogador = estado.jogador;
+  const poder = poderDoJogador(jogador);
+  const atual = clubeAtual(estado);
+  return estado.clubes
+    .filter(c => (incluirAtual ? true : c.nome !== (atual && atual.nome)))
+    .map(c => ({ clube: c, gap: Math.abs(c.reputacao - poder) }))
+    .filter(x => x.gap <= 22 || x.clube.reputacao <= poder + 6)
+    .sort((a, b) => a.gap - b.gap)
+    .slice(0, 6)
+    .map(x => x.clube);
+}
+
+function calcularSalarioOferta(clube, jogador) {
+  const ovr = overall(jogador);
+  const base = (clube.reputacao * 900) + (ovr * 700) + (jogador.potencial * 200);
+  return Math.round(base / 50) * 50;
+}
+
+function assinarComClube(estado, clube) {
+  const jogador = estado.jogador;
+  if (jogador.clubeNome) {
+    jogador.historicoClubes.push({
+      clube: jogador.clubeNome,
+      de: estado.temporadaInicioNoClube || estado.ano,
+      ate: estado.ano,
+    });
+  }
+  jogador.clubeNome = clube.nome;
+  jogador.ligaIdAtual = clube.ligaId;
+  jogador.salario = calcularSalarioOferta(clube, jogador);
+  jogador.contratoAte = estado.ano + rndInt(2, 4);
+  estado.temporadaInicioNoClube = estado.ano;
+}
+
+/* ---------- Simulacao de partidas --------------------------------------- */
+
+function forcaClube(clube) {
+  return clube.reputacao + rnd(-6, 6);
+}
+
+function simularPlacar(forcaA, forcaB) {
+  const diff = (forcaA - forcaB) / 12;
+  const mediaA = clamp(1.35 + diff * 0.35, 0.3, 3.6);
+  const mediaB = clamp(1.35 - diff * 0.35, 0.3, 3.6);
+  return [poisson(mediaA), poisson(mediaB)];
+}
+
+function poisson(lambda) {
+  // Aproximacao simples e rapida (nao precisa ser estatisticamente perfeita)
+  let L = Math.exp(-lambda), k = 0, p = 1;
+  do { k++; p *= Math.random(); } while (p > L && k < 9);
+  return k - 1;
+}
+
+function registrarResultado(clube, golsPro, golsContra) {
+  clube.jogos++; clube.golsPro += golsPro; clube.golsContra += golsContra;
+  if (golsPro > golsContra) { clube.vitorias++; clube.pontos += 3; }
+  else if (golsPro === golsContra) { clube.empates++; clube.pontos += 1; }
+  else { clube.derrotas++; }
+}
+
+function gerarRodadas(clubes) {
+  // Round-robin simples (todos contra todos, uma vez) via algoritmo do circulo
+  const lista = [...clubes];
+  if (lista.length % 2 !== 0) lista.push(null); // bye
+  const n = lista.length;
+  const rodadas = [];
+  for (let r = 0; r < n - 1; r++) {
+    const jogosRodada = [];
+    for (let i = 0; i < n / 2; i++) {
+      const a = lista[i], b = lista[n - 1 - i];
+      if (a && b) jogosRodada.push([a, b]);
+    }
+    rodadas.push(jogosRodada);
+    lista.splice(1, 0, lista.pop());
+  }
+  return rodadas;
+}
+
+function simularParticipacaoJogador(estado, foiCasa, golsTime, golsAdversario) {
+  const jogador = estado.jogador;
+  const ovr = overall(jogador);
+  const clube = clubeAtual(estado);
+  const forcaMedia = clube.reputacao;
+
+  const chanceTitular = clamp(0.35 + (ovr - forcaMedia) / 90, 0.08, 0.97);
+  const titular = Math.random() < chanceTitular;
+  const stats = jogador.estatisticasTemporada;
+
+  if (!titular) return;
+
+  stats.jogos++;
+  estado.jogador.estatisticasCarreira.jogos++;
+
+  let nota = 6.0 + rnd(-0.6, 0.6);
+
+  if (["ATA", "MEI"].includes(jogador.posicao) && golsTime > 0) {
+    const chanceGolPorGolTime = jogador.atributos.atq / 260;
+    let golsMarcados = 0;
+    for (let i = 0; i < golsTime; i++) if (Math.random() < chanceGolPorGolTime) golsMarcados++;
+    if (golsMarcados > 0) {
+      stats.gols += golsMarcados;
+      jogador.estatisticasCarreira.gols += golsMarcados;
+      nota += golsMarcados * 0.5;
+    }
+    if (Math.random() < jogador.atributos.pas / 320 && golsTime > golsMarcados) {
+      stats.assistencias += 1;
+      jogador.estatisticasCarreira.assistencias += 1;
+      nota += 0.3;
+    }
+  }
+
+  if (["GOL", "ZAG", "LAT", "VOL"].includes(jogador.posicao) && golsAdversario === 0) {
+    stats.clSheets++;
+    jogador.estatisticasCarreira.clSheets++;
+    nota += 0.4;
+  }
+  if (["GOL", "ZAG", "LAT", "VOL"].includes(jogador.posicao)) {
+    nota -= golsAdversario * 0.15;
+  }
+
+  nota = clamp(nota, 3.0, 10.0);
+  stats.notaSoma += nota; stats.jogosComNota++;
+  jogador.estatisticasCarreira.notaSoma += nota;
+  jogador.estatisticasCarreira.jogosComNota++;
+}
+
+function simularMeiaTemporada(estado) {
+  const liga = clubesDaLiga(estado.clubes, estado.jogador.ligaIdAtual || estado.jogador.ligaIdPreferida);
+  const rodadas = gerarRodadas(liga);
+  const nomeClubeJogador = estado.jogador.clubeNome;
+
+  for (const rodada of rodadas) {
+    for (const [a, b] of rodada) {
+      const [golsA, golsB] = simularPlacar(forcaClube(a), forcaClube(b));
+      registrarResultado(a, golsA, golsB);
+      registrarResultado(b, golsB, golsA);
+      if (a.nome === nomeClubeJogador) simularParticipacaoJogador(estado, true, golsA, golsB);
+      if (b.nome === nomeClubeJogador) simularParticipacaoJogador(estado, false, golsB, golsA);
+    }
+  }
+
+  // Chance pequena de lesao (so afeta o relato, ja simplificado nas partidas acima)
+  const lesionou = Math.random() < 0.08;
+
+  crescerAtributos(estado.jogador);
+  atualizarValorDeMercado(estado.jogador);
+
+  return { lesionou };
+}
+
+function crescerAtributos(jogador) {
+  const stats = jogador.estatisticasTemporada;
+  const desempenho = stats.jogosComNota > 0 ? stats.notaSoma / stats.jogosComNota : 6.0;
+  let delta = 0;
+  if (jogador.idade <= 20) delta = rnd(1.0, 2.6);
+  else if (jogador.idade <= 23) delta = rnd(0.4, 1.6);
+  else if (jogador.idade <= 29) delta = rnd(-0.2, 0.6);
+  else if (jogador.idade <= 32) delta = rnd(-1.0, 0.1);
+  else delta = rnd(-2.2, -0.6);
+
+  if (desempenho >= 7.0) delta += 0.4;
+  if (desempenho <= 5.6 && stats.jogosComNota > 0) delta -= 0.3;
+
+  const tetoPotencial = jogador.potencial;
+  for (const k in jogador.atributos) {
+    const alvo = jogador.atributos[k] + delta * rnd(0.6, 1.2);
+    jogador.atributos[k] = clamp(alvo, 15, Math.min(99, tetoPotencial + 8));
+  }
+}
+
+function tabelaOrdenada(clubes, ligaId) {
+  return clubesDaLiga(clubes, ligaId)
+    .slice()
+    .sort((a, b) => (b.pontos - a.pontos) || ((b.golsPro - b.golsContra) - (a.golsPro - a.golsContra)));
+}
+
+/* ---------- Ciclo de temporada ------------------------------------------- */
+
+function avancarParaProximaJanela(estado) {
+  const jogador = estado.jogador;
+  jogador.estatisticasTemporada = statsVazias();
+
+  if (estado.turno === 1) {
+    estado.turno = 2; // vira o returno, mesma temporada
+  } else {
+    // fim de temporada: definir campeao, atualizar idade, resetar tabela
+    const tabela = tabelaOrdenada(estado.clubes, jogador.ligaIdAtual || jogador.ligaIdPreferida);
+    const campeao = tabela[0];
+    estado.ultimoCampeao = campeao ? campeao.nome : null;
+    if (campeao && campeao.nome === jogador.clubeNome) {
+      jogador.titulos.push(`${estado.ano} — Campeao (${LEAGUES.find(l => l.id === (jogador.ligaIdAtual || jogador.ligaIdPreferida)).nome})`);
+    }
+    resetarTabela(estado.clubes);
+    estado.ano += 1;
+    estado.turno = 1;
+    jogador.idade += 1;
+  }
+}
+
+function jogadorDeveConsiderarAposentadoria(jogador) {
+  return jogador.idade >= 33;
+}
+
+function aposentar(jogador) {
+  jogador.aposentado = true;
+}
+
+/* ---------- Salvar / carregar --------------------------------------------- */
+
+function salvarEstado(estado) {
+  try {
+    localStorage.setItem(SAVE_KEY, JSON.stringify(estado));
+    return true;
+  } catch (e) { return false; }
+}
+
+function carregarEstado() {
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch (e) { return null; }
+}
+
+function apagarEstado() {
+  try { localStorage.removeItem(SAVE_KEY); } catch (e) { /* noop */ }
+}
+/* ==========================================================================
+   FUTCAREER — camada de interface
+   Le e escreve no objeto `estado` e chama as funcoes de js/engine.js.
+   Nao ha nenhuma logica de simulacao aqui, so montagem de tela.
+   ========================================================================== */
+
+let estado = null;
+const app = document.getElementById("app");
+
+function nomeLiga(id) { return (LEAGUES.find(l => l.id === id) || {}).nome || "—"; }
+
+function iniciarTela() {
+  const salvo = carregarEstado();
+  app.innerHTML = `
+    <section class="tela tela-abertura">
+      <div class="abertura-marca">
+        <span class="abertura-numero">10</span>
+        <h1>FUTCAREER</h1>
+        <p class="subt">Monte a carreira do seu jogador, temporada a temporada.</p>
+      </div>
+      <div class="abertura-acoes">
+        <button class="btn btn-primario" id="btn-nova-carreira">Nova carreira</button>
+        ${salvo ? `<button class="btn btn-secundario" id="btn-continuar">Continuar carreira salva</button>` : ""}
+      </div>
+    </section>
+  `;
+  document.getElementById("btn-nova-carreira").addEventListener("click", telaCriacao);
+  const btnContinuar = document.getElementById("btn-continuar");
+  if (btnContinuar) btnContinuar.addEventListener("click", () => {
+    estado = salvo;
+    if (!estado.jogador.clubeNome) telaEscolhaClube(); else telaDashboard();
+  });
+}
+
+function telaCriacao() {
+  const opcoesPosicao = Object.entries(POSICOES)
+    .map(([id, p]) => `<option value="${id}">${p.label}</option>`).join("");
+  const opcoesNacionalidade = NACIONALIDADES
+    .map(n => `<option value="${n}">${n}</option>`).join("");
+  const cardsEstilo = ESTILOS.map(e => `
+    <label class="cartao-estilo">
+      <input type="radio" name="estilo" value="${e.id}" ${e.id === "finalizador" ? "checked" : ""}>
+      <span class="cartao-estilo-titulo">${e.nome}</span>
+      <span class="cartao-estilo-desc">${e.descricao}</span>
+    </label>
+  `).join("");
+
+  app.innerHTML = `
+    <section class="tela tela-criacao">
+      <h2>Crie seu jogador</h2>
+      <div class="campo">
+        <label for="input-nome">Nome</label>
+        <input id="input-nome" type="text" maxlength="24" placeholder="Ex: Bruno Andrade">
+      </div>
+      <div class="campo-linha">
+        <div class="campo">
+          <label for="select-nacionalidade">Nacionalidade</label>
+          <select id="select-nacionalidade">${opcoesNacionalidade}</select>
+        </div>
+        <div class="campo">
+          <label for="select-posicao">Posicao</label>
+          <select id="select-posicao">${opcoesPosicao}</select>
+        </div>
+      </div>
+      <div class="campo">
+        <label>Estilo de jogo</label>
+        <div class="grade-estilos">${cardsEstilo}</div>
+      </div>
+      <button class="btn btn-primario" id="btn-confirmar-criacao">Comecar carreira</button>
+    </section>
+  `;
+
+  document.getElementById("btn-confirmar-criacao").addEventListener("click", () => {
+    const nome = document.getElementById("input-nome").value.trim() || "Jogador Sem Nome";
+    const nacionalidade = document.getElementById("select-nacionalidade").value;
+    const posicao = document.getElementById("select-posicao").value;
+    const estiloId = document.querySelector('input[name="estilo"]:checked').value;
+
+    const jogador = criarJogador({ nome, nacionalidade, posicao, estiloId });
+    estado = {
+      jogador,
+      clubes: novoMundo(),
+      ano: new Date().getFullYear(),
+      turno: 1,
+      ultimoCampeao: null,
+    };
+    telaEscolhaClube();
+  });
+}
+
+function telaEscolhaClube() {
+  const candidatos = clubesInteressados(estado, true)
+    .filter(c => c.nivel >= 2 || c.reputacao <= 65)
+    .slice(0, 5);
+  const lista = (candidatos.length ? candidatos : estado.clubes.filter(c => c.nivel === 2).slice(0, 5))
+    .map((c, i) => `
+      <div class="cartao-clube">
+        <div class="cartao-clube-topo">
+          <strong>${c.nome}</strong>
+          <span class="tag">${nomeLiga(c.ligaId)}</span>
+        </div>
+        <div class="cartao-clube-info">
+          <span>Reputacao: ${c.reputacao}</span>
+          <span>Salario estimado: R$ ${calcularSalarioOferta(c, estado.jogador).toLocaleString("pt-BR")}/mes</span>
+        </div>
+        <button class="btn btn-secundario" data-clube="${c.nome}">Assinar contrato</button>
+      </div>
+    `).join("");
+
+  app.innerHTML = `
+    <section class="tela tela-mercado">
+      <h2>Primeiro contrato profissional</h2>
+      <p class="texto-apoio">Clubes dispostos a te dar uma chance no time principal:</p>
+      <div class="lista-clubes">${lista}</div>
+    </section>
+  `;
+
+  document.querySelectorAll("[data-clube]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const clube = estado.clubes.find(c => c.nome === btn.dataset.clube);
+      assinarComClube(estado, clube);
+      salvarEstado(estado);
+      telaDashboard();
+    });
+  });
+}
+
+function cartaoJogadorHTML() {
+  const j = estado.jogador;
+  const ovr = overall(j);
+  return `
+    <div class="cartao-jogador">
+      <div class="cartao-jogador-ovr">${ovr}</div>
+      <div class="cartao-jogador-dados">
+        <h3>${j.nome}</h3>
+        <p>${POSICOES[j.posicao].label} · ${j.idade} anos · ${j.nacionalidade}</p>
+        <p class="destaque">${j.clubeNome || "Sem clube"} (${nomeLiga(j.ligaIdAtual || j.ligaIdPreferida)})</p>
+        <p class="texto-apoio">Potencial: ${j.potencial} · Valor de mercado: R$ ${j.valorDeMercado.toLocaleString("pt-BR")}</p>
+      </div>
+    </div>
+  `;
+}
+
+function tabelaHTML() {
+  const j = estado.jogador;
+  const ligaId = j.ligaIdAtual || j.ligaIdPreferida;
+  const linhas = tabelaOrdenada(estado.clubes, ligaId).map((c, i) => `
+    <tr class="${c.nome === j.clubeNome ? "linha-destaque" : ""}">
+      <td>${i + 1}</td><td>${c.nome}</td><td>${c.pontos}</td><td>${c.jogos}</td>
+      <td>${c.vitorias}</td><td>${c.empates}</td><td>${c.derrotas}</td>
+      <td>${c.golsPro}</td><td>${c.golsContra}</td>
+    </tr>
+  `).join("");
+  return `
+    <table class="tabela-liga">
+      <caption>${nomeLiga(ligaId)} — ${estado.ano} · ${estado.turno === 1 ? "1º turno" : "2º turno"}</caption>
+      <thead><tr><th>#</th><th>Clube</th><th>Pts</th><th>J</th><th>V</th><th>E</th><th>D</th><th>GP</th><th>GC</th></tr></thead>
+      <tbody>${linhas || "<tr><td colspan='9'>Sem jogos ainda.</td></tr>"}</tbody>
+    </table>
+  `;
+}
+
+function telaDashboard() {
+  const j = estado.jogador;
+  const podeAposentar = jogadorDeveConsiderarAposentadoria(j);
+  app.innerHTML = `
+    <section class="tela tela-dashboard">
+      <header class="barra-topo">
+        <span class="marca">FUTCAREER</span>
+        <span>${estado.ano} · ${estado.turno === 1 ? "1º turno" : "2º turno"}</span>
+      </header>
+      ${cartaoJogadorHTML()}
+      ${tabelaHTML()}
+      <div class="acoes">
+        <button class="btn btn-primario" id="btn-simular">Simular temporada</button>
+        <button class="btn btn-secundario" id="btn-carreira">Ver estatisticas de carreira</button>
+        ${podeAposentar ? `<button class="btn btn-perigo" id="btn-aposentar">Encerrar carreira</button>` : ""}
+      </div>
+    </section>
+  `;
+  document.getElementById("btn-simular").addEventListener("click", () => {
+    const resultado = simularMeiaTemporada(estado);
+    salvarEstado(estado);
+    telaResultado(resultado);
+  });
+  document.getElementById("btn-carreira").addEventListener("click", telaResumoCarreira);
+  const btnAposentar = document.getElementById("btn-aposentar");
+  if (btnAposentar) btnAposentar.addEventListener("click", () => {
+    aposentar(j);
+    salvarEstado(estado);
+    telaResumoCarreira();
+  });
+}
+
+function telaResultado(resultado) {
+  const j = estado.jogador;
+  const stats = j.estatisticasTemporada;
+  const media = stats.jogosComNota ? (stats.notaSoma / stats.jogosComNota).toFixed(1) : "—";
+  app.innerHTML = `
+    <section class="tela tela-resultado">
+      <h2>Fim do ${estado.turno === 1 ? "1º" : "2º"} turno — ${estado.ano}</h2>
+      <div class="grade-stats">
+        <div><span class="numero">${stats.jogos}</span><span>Jogos</span></div>
+        <div><span class="numero">${stats.gols}</span><span>Gols</span></div>
+        <div><span class="numero">${stats.assistencias}</span><span>Assistencias</span></div>
+        <div><span class="numero">${media}</span><span>Nota media</span></div>
+      </div>
+      ${resultado.lesionou ? `<p class="aviso">Voce sofreu uma lesao ao longo do turno e desfalcou o time em algumas partidas.</p>` : ""}
+      ${tabelaHTML()}
+      <button class="btn btn-primario" id="btn-para-mercado">Ir para a janela de transferencias</button>
+    </section>
+  `;
+  document.getElementById("btn-para-mercado").addEventListener("click", () => {
+    const anoAntes = estado.ano;
+    avancarParaProximaJanela(estado);
+    salvarEstado(estado);
+    telaMercado(anoAntes !== estado.ano);
+  });
+}
+
+function telaMercado(temporadaVirou) {
+  const j = estado.jogador;
+  const atual = clubeAtual(estado);
+  const opcoes = clubesInteressados(estado, false);
+  const cartoes = opcoes.map(c => `
+    <div class="cartao-clube">
+      <div class="cartao-clube-topo">
+        <strong>${c.nome}</strong>
+        <span class="tag">${nomeLiga(c.ligaId)}</span>
+      </div>
+      <div class="cartao-clube-info">
+        <span>Reputacao: ${c.reputacao}</span>
+        <span>Salario estimado: R$ ${calcularSalarioOferta(c, j).toLocaleString("pt-BR")}/mes</span>
+      </div>
+      <button class="btn btn-secundario" data-clube="${c.nome}">Assinar</button>
+    </div>
+  `).join("");
+
+  app.innerHTML = `
+    <section class="tela tela-mercado">
+      ${temporadaVirou && estado.ultimoCampeao ? `<p class="aviso aviso-campeao">Campeao de ${estado.ano - 1}: <strong>${estado.ultimoCampeao}</strong>${estado.ultimoCampeao === (atual && atual.nome) ? " — parabens, voce e campeao!" : ""}</p>` : ""}
+      <h2>Janela de transferencias</h2>
+      <p class="texto-apoio">Clube atual: <strong>${atual ? atual.nome : "—"}</strong> · Contrato ate ${j.contratoAte}</p>
+      <div class="lista-clubes">
+        ${cartoes || "<p class='texto-apoio'>Nenhum clube com interesse forte no momento.</p>"}
+      </div>
+      <button class="btn btn-primario" id="btn-permanecer">Permanecer no clube atual</button>
+    </section>
+  `;
+
+  document.querySelectorAll("[data-clube]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const clube = estado.clubes.find(c => c.nome === btn.dataset.clube);
+      assinarComClube(estado, clube);
+      salvarEstado(estado);
+      telaDashboard();
+    });
+  });
+  document.getElementById("btn-permanecer").addEventListener("click", () => {
+    salvarEstado(estado);
+    telaDashboard();
+  });
+}
+
+function telaResumoCarreira() {
+  const j = estado.jogador;
+  const c = j.estatisticasCarreira;
+  const media = c.jogosComNota ? (c.notaSoma / c.jogosComNota).toFixed(1) : "—";
+  const historico = [...j.historicoClubes, j.clubeNome ? { clube: j.clubeNome, de: estado.temporadaInicioNoClube, ate: estado.ano } : null]
+    .filter(Boolean)
+    .map(h => `<li>${h.clube} (${h.de}–${j.aposentado ? estado.ano : "atual"})</li>`).join("");
+  const titulos = j.titulos.length ? `<ul>${j.titulos.map(t => `<li>${t}</li>`).join("")}</ul>` : "<p class='texto-apoio'>Nenhum titulo ainda.</p>";
+
+  app.innerHTML = `
+    <section class="tela tela-resumo">
+      <h2>${j.aposentado ? "Carreira encerrada" : "Estatisticas de carreira"}</h2>
+      ${cartaoJogadorHTML()}
+      <div class="grade-stats">
+        <div><span class="numero">${c.jogos}</span><span>Jogos</span></div>
+        <div><span class="numero">${c.gols}</span><span>Gols</span></div>
+        <div><span class="numero">${c.assistencias}</span><span>Assistencias</span></div>
+        <div><span class="numero">${media}</span><span>Nota media</span></div>
+      </div>
+      <h3>Titulos</h3>
+      ${titulos}
+      <h3>Clubes</h3>
+      <ul>${historico}</ul>
+      <div class="acoes">
+        ${j.aposentado
+          ? `<button class="btn btn-primario" id="btn-nova-vida">Comecar nova carreira</button>`
+          : `<button class="btn btn-secundario" id="btn-voltar">Voltar</button>`}
+      </div>
+    </section>
+  `;
+
+  const btnVoltar = document.getElementById("btn-voltar");
+  if (btnVoltar) btnVoltar.addEventListener("click", telaDashboard);
+  const btnNovaVida = document.getElementById("btn-nova-vida");
+  if (btnNovaVida) btnNovaVida.addEventListener("click", () => { apagarEstado(); iniciarTela(); });
+}
+
+iniciarTela();
+</script>
 </body>
 </html>
