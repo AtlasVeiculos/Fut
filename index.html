@@ -184,6 +184,21 @@ input[type="text"], select {
 
 .acoes { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
 
+/* ---------- Foco de treino -------------------------------------------------- */
+.bloco-foco { margin-top: 18px; }
+.linha-foco { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+.btn-foco {
+  border: 1px solid var(--linha);
+  background: var(--pitch);
+  color: var(--chalk);
+  border-radius: 3px;
+  padding: 8px 12px;
+  font-size: 0.82rem;
+  cursor: pointer;
+  font-family: inherit;
+}
+.btn-foco-ativo { border-color: var(--floodlight); background: var(--pitch-light); color: var(--floodlight); }
+
 /* ---------- Cartoes de clube (mercado) ------------------------------------ */
 .lista-clubes { display: flex; flex-direction: column; gap: 10px; margin: 16px 0; }
 .cartao-clube {
@@ -210,6 +225,7 @@ input[type="text"], select {
   color: rgba(237, 243, 238, 0.75);
   font-family: var(--fonte-numero);
 }
+.destaque-projeto { color: var(--floodlight); font-family: var(--fonte-titulo); }
 
 /* ---------- Resultado / avisos --------------------------------------------- */
 .grade-stats {
@@ -271,173 +287,293 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 <script>
 /* ==========================================================================
    FUTCAREER — base de dados de ligas, clubes e nacionalidades
-   Todos os valores de "reputacao" vao de 1 a 100 e definem, de forma
-   simplificada, a forca media do elenco, o orcamento e o salario-base
-   que o clube consegue pagar. Isso NAO e uma copia de nenhum jogo — sao
-   apenas nomes de clubes e ligas reais usados como referencia de realismo.
+   Agora com divisoes completas (1a e 2a divisao na maioria dos paises,
+   com o numero real de clubes de cada liga) para permitir promocao e
+   rebaixamento no fim de cada temporada. Nomes de clubes e ligas reais
+   sao usados apenas como referencia de realismo — os valores de
+   "reputacao" (1 a 100) sao estimativas simplificadas, nao dados oficiais.
    ========================================================================== */
 
 const LEAGUES = [
   {
-    id: "BRA1",
-    nome: "Brasileirao Serie A",
-    pais: "Brasil",
-    nivel: 1,
+    id: "BRA1", nome: "Brasileirao Serie A", pais: "Brasil", nivel: 1,
     clubes: [
-      { nome: "Flamengo",      reputacao: 88 },
-      { nome: "Palmeiras",     reputacao: 89 },
-      { nome: "Sao Paulo",     reputacao: 82 },
-      { nome: "Corinthians",   reputacao: 83 },
-      { nome: "Gremio",        reputacao: 79 },
-      { nome: "Internacional", reputacao: 78 },
-      { nome: "Atletico-MG",   reputacao: 80 },
-      { nome: "Fluminense",    reputacao: 77 },
+      { nome: "Palmeiras", reputacao: 89 }, { nome: "Flamengo", reputacao: 90 },
+      { nome: "Botafogo", reputacao: 82 }, { nome: "Fortaleza", reputacao: 76 },
+      { nome: "Atletico-MG", reputacao: 80 }, { nome: "Bahia", reputacao: 74 },
+      { nome: "Corinthians", reputacao: 81 }, { nome: "Cruzeiro", reputacao: 77 },
+      { nome: "Fluminense", reputacao: 79 }, { nome: "Sao Paulo", reputacao: 82 },
+      { nome: "Internacional", reputacao: 78 }, { nome: "Gremio", reputacao: 78 },
+      { nome: "Vasco da Gama", reputacao: 73 }, { nome: "Bragantino", reputacao: 71 },
+      { nome: "Criciuma", reputacao: 58 }, { nome: "Athletico-PR", reputacao: 74 },
+      { nome: "Juventude", reputacao: 60 }, { nome: "Cuiaba", reputacao: 59 },
+      { nome: "Vitoria", reputacao: 61 }, { nome: "Atletico-GO", reputacao: 57 },
     ],
   },
   {
-    id: "BRA2",
-    nome: "Brasileirao Serie B",
-    pais: "Brasil",
-    nivel: 2,
+    id: "BRA2", nome: "Brasileirao Serie B", pais: "Brasil", nivel: 2,
     clubes: [
-      { nome: "Vasco da Gama", reputacao: 62 },
-      { nome: "Sport Recife",  reputacao: 55 },
-      { nome: "Ceara",         reputacao: 54 },
-      { nome: "Guarani",       reputacao: 48 },
-      { nome: "Coritiba",      reputacao: 50 },
-      { nome: "Novorizontino", reputacao: 44 },
+      { nome: "Sport Recife", reputacao: 55 }, { nome: "Santos", reputacao: 68 },
+      { nome: "Novorizontino", reputacao: 48 }, { nome: "Mirassol", reputacao: 50 },
+      { nome: "Ceara", reputacao: 54 }, { nome: "Avai", reputacao: 49 },
+      { nome: "Guarani", reputacao: 47 }, { nome: "Coritiba", reputacao: 56 },
+      { nome: "Chapecoense", reputacao: 46 }, { nome: "Vila Nova", reputacao: 45 },
+      { nome: "Amazonas", reputacao: 42 }, { nome: "Ituano", reputacao: 41 },
+      { nome: "Botafogo-SP", reputacao: 40 }, { nome: "Operario-PR", reputacao: 44 },
+      { nome: "Paysandu", reputacao: 46 }, { nome: "CRB", reputacao: 47 },
+      { nome: "Goias", reputacao: 53 }, { nome: "Brusque", reputacao: 41 },
+      { nome: "America-MG", reputacao: 50 }, { nome: "Ponte Preta", reputacao: 45 },
     ],
   },
   {
-    id: "ENG1",
-    nome: "Premier League",
-    pais: "Inglaterra",
-    nivel: 1,
+    id: "ENG1", nome: "Premier League", pais: "Inglaterra", nivel: 1,
     clubes: [
-      { nome: "Manchester City",  reputacao: 95 },
-      { nome: "Arsenal",          reputacao: 90 },
-      { nome: "Liverpool",        reputacao: 92 },
-      { nome: "Chelsea",          reputacao: 86 },
-      { nome: "Manchester United", reputacao: 85 },
-      { nome: "Tottenham",        reputacao: 83 },
-      { nome: "Newcastle",        reputacao: 80 },
-      { nome: "Aston Villa",      reputacao: 78 },
+      { nome: "Manchester City", reputacao: 95 }, { nome: "Arsenal", reputacao: 90 },
+      { nome: "Liverpool", reputacao: 92 }, { nome: "Chelsea", reputacao: 86 },
+      { nome: "Manchester United", reputacao: 85 }, { nome: "Tottenham", reputacao: 83 },
+      { nome: "Newcastle", reputacao: 80 }, { nome: "Aston Villa", reputacao: 78 },
+      { nome: "Brighton", reputacao: 75 }, { nome: "West Ham", reputacao: 74 },
+      { nome: "Crystal Palace", reputacao: 70 }, { nome: "Fulham", reputacao: 69 },
+      { nome: "Wolves", reputacao: 68 }, { nome: "Everton", reputacao: 70 },
+      { nome: "Brentford", reputacao: 68 }, { nome: "Nottingham Forest", reputacao: 65 },
+      { nome: "Bournemouth", reputacao: 65 }, { nome: "Luton Town", reputacao: 55 },
+      { nome: "Burnley", reputacao: 58 }, { nome: "Sheffield United", reputacao: 55 },
     ],
   },
   {
-    id: "ESP1",
-    nome: "La Liga",
-    pais: "Espanha",
-    nivel: 1,
+    id: "ENG2", nome: "Championship", pais: "Inglaterra", nivel: 2,
     clubes: [
-      { nome: "Real Madrid",     reputacao: 96 },
-      { nome: "Barcelona",       reputacao: 93 },
-      { nome: "Atletico Madrid", reputacao: 87 },
-      { nome: "Sevilla",         reputacao: 78 },
-      { nome: "Real Sociedad",   reputacao: 76 },
-      { nome: "Villarreal",      reputacao: 77 },
-      { nome: "Athletic Bilbao", reputacao: 75 },
-      { nome: "Real Betis",      reputacao: 74 },
+      { nome: "Leeds United", reputacao: 66 }, { nome: "Leicester City", reputacao: 68 },
+      { nome: "Southampton", reputacao: 65 }, { nome: "West Bromwich Albion", reputacao: 58 },
+      { nome: "Norwich City", reputacao: 57 }, { nome: "Hull City", reputacao: 53 },
+      { nome: "Coventry City", reputacao: 54 }, { nome: "Middlesbrough", reputacao: 55 },
+      { nome: "Preston North End", reputacao: 50 }, { nome: "Bristol City", reputacao: 51 },
+      { nome: "Cardiff City", reputacao: 50 }, { nome: "Swansea City", reputacao: 52 },
+      { nome: "Watford", reputacao: 54 }, { nome: "Millwall", reputacao: 48 },
+      { nome: "Sunderland", reputacao: 53 }, { nome: "Stoke City", reputacao: 52 },
+      { nome: "Blackburn Rovers", reputacao: 47 }, { nome: "QPR", reputacao: 46 },
+      { nome: "Sheffield Wednesday", reputacao: 49 }, { nome: "Plymouth Argyle", reputacao: 42 },
+      { nome: "Rotherham United", reputacao: 40 }, { nome: "Birmingham City", reputacao: 50 },
+      { nome: "Huddersfield Town", reputacao: 44 }, { nome: "Ipswich Town", reputacao: 53 },
     ],
   },
   {
-    id: "ITA1",
-    nome: "Serie A",
-    pais: "Italia",
-    nivel: 1,
+    id: "ESP1", nome: "La Liga", pais: "Espanha", nivel: 1,
     clubes: [
-      { nome: "Inter de Milao", reputacao: 89 },
-      { nome: "AC Milan",       reputacao: 86 },
-      { nome: "Juventus",       reputacao: 87 },
-      { nome: "Napoli",         reputacao: 84 },
-      { nome: "Roma",           reputacao: 80 },
-      { nome: "Atalanta",       reputacao: 79 },
-      { nome: "Lazio",          reputacao: 77 },
-      { nome: "Fiorentina",     reputacao: 74 },
+      { nome: "Real Madrid", reputacao: 96 }, { nome: "Barcelona", reputacao: 93 },
+      { nome: "Atletico Madrid", reputacao: 87 }, { nome: "Girona", reputacao: 76 },
+      { nome: "Athletic Bilbao", reputacao: 78 }, { nome: "Real Sociedad", reputacao: 77 },
+      { nome: "Real Betis", reputacao: 75 }, { nome: "Villarreal", reputacao: 76 },
+      { nome: "Valencia", reputacao: 72 }, { nome: "Sevilla", reputacao: 76 },
+      { nome: "Getafe", reputacao: 65 }, { nome: "Osasuna", reputacao: 64 },
+      { nome: "Celta Vigo", reputacao: 63 }, { nome: "Mallorca", reputacao: 62 },
+      { nome: "Rayo Vallecano", reputacao: 62 }, { nome: "Las Palmas", reputacao: 58 },
+      { nome: "Alaves", reputacao: 57 }, { nome: "Cadiz", reputacao: 55 },
+      { nome: "Granada", reputacao: 54 }, { nome: "Almeria", reputacao: 52 },
     ],
   },
   {
-    id: "GER1",
-    nome: "Bundesliga",
-    pais: "Alemanha",
-    nivel: 1,
+    id: "ESP2", nome: "Segunda Division", pais: "Espanha", nivel: 2,
     clubes: [
-      { nome: "Bayern de Munique",  reputacao: 93 },
-      { nome: "Borussia Dortmund",  reputacao: 85 },
-      { nome: "RB Leipzig",         reputacao: 82 },
-      { nome: "Bayer Leverkusen",   reputacao: 83 },
-      { nome: "Eintracht Frankfurt", reputacao: 76 },
-      { nome: "Wolfsburg",          reputacao: 73 },
-      { nome: "Freiburg",           reputacao: 72 },
+      { nome: "Leganes", reputacao: 48 }, { nome: "Espanyol", reputacao: 62 },
+      { nome: "Eibar", reputacao: 47 }, { nome: "Racing Santander", reputacao: 46 },
+      { nome: "Elche", reputacao: 55 }, { nome: "Real Oviedo", reputacao: 48 },
+      { nome: "Sporting Gijon", reputacao: 47 }, { nome: "Tenerife", reputacao: 45 },
+      { nome: "Levante", reputacao: 56 }, { nome: "Mirandes", reputacao: 40 },
+      { nome: "Real Zaragoza", reputacao: 50 }, { nome: "Albacete", reputacao: 42 },
+      { nome: "Burgos", reputacao: 41 }, { nome: "SD Huesca", reputacao: 44 },
+      { nome: "Villarreal B", reputacao: 40 }, { nome: "Amorebieta", reputacao: 38 },
+      { nome: "Racing Ferrol", reputacao: 39 }, { nome: "FC Cartagena", reputacao: 41 },
+      { nome: "FC Andorra", reputacao: 38 }, { nome: "CD Eldense", reputacao: 37 },
+      { nome: "Alcorcon", reputacao: 40 }, { nome: "Cordoba", reputacao: 43 },
     ],
   },
   {
-    id: "FRA1",
-    nome: "Ligue 1",
-    pais: "Franca",
-    nivel: 1,
+    id: "ITA1", nome: "Serie A", pais: "Italia", nivel: 1,
     clubes: [
-      { nome: "Paris Saint-Germain", reputacao: 91 },
-      { nome: "Marselha",            reputacao: 78 },
-      { nome: "Lyon",                reputacao: 76 },
-      { nome: "Monaco",              reputacao: 79 },
-      { nome: "Lille",               reputacao: 75 },
-      { nome: "Rennes",              reputacao: 73 },
-      { nome: "Lens",                reputacao: 72 },
+      { nome: "Inter de Milao", reputacao: 89 }, { nome: "Juventus", reputacao: 87 },
+      { nome: "AC Milan", reputacao: 86 }, { nome: "Napoli", reputacao: 84 },
+      { nome: "Atalanta", reputacao: 80 }, { nome: "Bologna", reputacao: 74 },
+      { nome: "Roma", reputacao: 80 }, { nome: "Lazio", reputacao: 77 },
+      { nome: "Fiorentina", reputacao: 76 }, { nome: "Torino", reputacao: 68 },
+      { nome: "Monza", reputacao: 62 }, { nome: "Genoa", reputacao: 63 },
+      { nome: "Lecce", reputacao: 58 }, { nome: "Sassuolo", reputacao: 61 },
+      { nome: "Udinese", reputacao: 60 }, { nome: "Frosinone", reputacao: 52 },
+      { nome: "Cagliari", reputacao: 58 }, { nome: "Verona", reputacao: 55 },
+      { nome: "Empoli", reputacao: 55 }, { nome: "Salernitana", reputacao: 52 },
     ],
   },
   {
-    id: "POR1",
-    nome: "Primeira Liga",
-    pais: "Portugal",
-    nivel: 1,
+    id: "ITA2", nome: "Serie B", pais: "Italia", nivel: 2,
     clubes: [
-      { nome: "Benfica",             reputacao: 82 },
-      { nome: "Porto",               reputacao: 81 },
-      { nome: "Sporting CP",         reputacao: 80 },
-      { nome: "Braga",               reputacao: 71 },
-      { nome: "Vitoria de Guimaraes", reputacao: 65 },
+      { nome: "Parma", reputacao: 60 }, { nome: "Como", reputacao: 52 },
+      { nome: "Venezia", reputacao: 54 }, { nome: "Cremonese", reputacao: 53 },
+      { nome: "Palermo", reputacao: 55 }, { nome: "Bari", reputacao: 51 },
+      { nome: "Sampdoria", reputacao: 58 }, { nome: "Cittadella", reputacao: 44 },
+      { nome: "Cosenza", reputacao: 40 }, { nome: "Modena", reputacao: 43 },
+      { nome: "Catanzaro", reputacao: 45 }, { nome: "Pisa", reputacao: 46 },
+      { nome: "Ternana", reputacao: 41 }, { nome: "Reggiana", reputacao: 42 },
+      { nome: "Ascoli", reputacao: 43 }, { nome: "Brescia", reputacao: 44 },
+      { nome: "Sudtirol", reputacao: 41 }, { nome: "Feralpisalo", reputacao: 38 },
+      { nome: "Lecco", reputacao: 39 }, { nome: "Spezia", reputacao: 50 },
     ],
   },
   {
-    id: "NED1",
-    nome: "Eredivisie",
-    pais: "Holanda",
-    nivel: 1,
+    id: "GER1", nome: "Bundesliga", pais: "Alemanha", nivel: 1,
     clubes: [
-      { nome: "Ajax",       reputacao: 78 },
-      { nome: "PSV Eindhoven", reputacao: 79 },
-      { nome: "Feyenoord",  reputacao: 77 },
-      { nome: "AZ Alkmaar", reputacao: 68 },
-      { nome: "Twente",     reputacao: 65 },
+      { nome: "Bayern de Munique", reputacao: 93 }, { nome: "Bayer Leverkusen", reputacao: 87 },
+      { nome: "Stuttgart", reputacao: 76 }, { nome: "RB Leipzig", reputacao: 83 },
+      { nome: "Borussia Dortmund", reputacao: 85 }, { nome: "Eintracht Frankfurt", reputacao: 74 },
+      { nome: "Hoffenheim", reputacao: 66 }, { nome: "Freiburg", reputacao: 70 },
+      { nome: "Werder Bremen", reputacao: 63 }, { nome: "Augsburg", reputacao: 60 },
+      { nome: "Wolfsburg", reputacao: 68 }, { nome: "Borussia Monchengladbach", reputacao: 67 },
+      { nome: "Union Berlin", reputacao: 65 }, { nome: "Bochum", reputacao: 55 },
+      { nome: "Heidenheim", reputacao: 50 }, { nome: "Mainz 05", reputacao: 61 },
+      { nome: "Koln", reputacao: 58 }, { nome: "Darmstadt", reputacao: 46 },
     ],
   },
   {
-    id: "USA1",
-    nome: "MLS",
-    pais: "Estados Unidos",
-    nivel: 1,
+    id: "GER2", nome: "2. Bundesliga", pais: "Alemanha", nivel: 2,
     clubes: [
-      { nome: "Inter Miami",     reputacao: 74 },
-      { nome: "LAFC",            reputacao: 72 },
-      { nome: "LA Galaxy",       reputacao: 68 },
-      { nome: "Atlanta United",  reputacao: 66 },
-      { nome: "Seattle Sounders", reputacao: 65 },
+      { nome: "Hamburger SV", reputacao: 58 }, { nome: "Fortuna Dusseldorf", reputacao: 50 },
+      { nome: "Hertha Berlin", reputacao: 56 }, { nome: "Schalke 04", reputacao: 55 },
+      { nome: "St. Pauli", reputacao: 52 }, { nome: "Hannover 96", reputacao: 51 },
+      { nome: "Kaiserslautern", reputacao: 48 }, { nome: "Karlsruher SC", reputacao: 44 },
+      { nome: "Elversberg", reputacao: 40 }, { nome: "Nurnberg", reputacao: 45 },
+      { nome: "Greuther Furth", reputacao: 43 }, { nome: "Eintracht Braunschweig", reputacao: 40 },
+      { nome: "Magdeburg", reputacao: 42 }, { nome: "Osnabruck", reputacao: 38 },
+      { nome: "Paderborn", reputacao: 46 }, { nome: "Rostock", reputacao: 39 },
+      { nome: "Wehen Wiesbaden", reputacao: 37 }, { nome: "Ulm", reputacao: 36 },
     ],
   },
   {
-    id: "MEX1",
-    nome: "Liga MX",
-    pais: "Mexico",
-    nivel: 1,
+    id: "FRA1", nome: "Ligue 1", pais: "Franca", nivel: 1,
     clubes: [
-      { nome: "Club America", reputacao: 71 },
-      { nome: "Chivas",       reputacao: 66 },
-      { nome: "Cruz Azul",    reputacao: 67 },
-      { nome: "Tigres",       reputacao: 70 },
-      { nome: "Monterrey",    reputacao: 69 },
+      { nome: "Paris Saint-Germain", reputacao: 91 }, { nome: "Monaco", reputacao: 79 },
+      { nome: "Brest", reputacao: 63 }, { nome: "Lille", reputacao: 75 },
+      { nome: "Nice", reputacao: 71 }, { nome: "Lens", reputacao: 72 },
+      { nome: "Lyon", reputacao: 76 }, { nome: "Marselha", reputacao: 78 },
+      { nome: "Rennes", reputacao: 73 }, { nome: "Reims", reputacao: 60 },
+      { nome: "Toulouse", reputacao: 58 }, { nome: "Montpellier", reputacao: 59 },
+      { nome: "Strasbourg", reputacao: 58 }, { nome: "Nantes", reputacao: 60 },
+      { nome: "Le Havre", reputacao: 50 }, { nome: "Metz", reputacao: 52 },
+      { nome: "Clermont", reputacao: 51 }, { nome: "Lorient", reputacao: 53 },
     ],
   },
+  {
+    id: "FRA2", nome: "Ligue 2", pais: "Franca", nivel: 2,
+    clubes: [
+      { nome: "Saint-Etienne", reputacao: 55 }, { nome: "Angers", reputacao: 54 },
+      { nome: "Auxerre", reputacao: 52 }, { nome: "Bastia", reputacao: 46 },
+      { nome: "Guingamp", reputacao: 45 }, { nome: "Grenoble", reputacao: 38 },
+      { nome: "Paris FC", reputacao: 48 }, { nome: "Amiens", reputacao: 44 },
+      { nome: "Laval", reputacao: 40 }, { nome: "Rodez", reputacao: 37 },
+      { nome: "Pau FC", reputacao: 38 }, { nome: "Concarneau", reputacao: 36 },
+      { nome: "Dunkerque", reputacao: 39 }, { nome: "Annecy", reputacao: 37 },
+      { nome: "Caen", reputacao: 47 }, { nome: "Ajaccio", reputacao: 45 },
+      { nome: "Quevilly-Rouen", reputacao: 36 }, { nome: "Valenciennes", reputacao: 40 },
+    ],
+  },
+  {
+    id: "POR1", nome: "Primeira Liga", pais: "Portugal", nivel: 1,
+    clubes: [
+      { nome: "Sporting CP", reputacao: 80 }, { nome: "Benfica", reputacao: 82 },
+      { nome: "Porto", reputacao: 81 }, { nome: "Braga", reputacao: 71 },
+      { nome: "Vitoria de Guimaraes", reputacao: 65 }, { nome: "Boavista", reputacao: 58 },
+      { nome: "Famalicao", reputacao: 55 }, { nome: "Casa Pia", reputacao: 50 },
+      { nome: "Estoril", reputacao: 52 }, { nome: "Rio Ave", reputacao: 53 },
+      { nome: "Moreirense", reputacao: 51 }, { nome: "Arouca", reputacao: 52 },
+      { nome: "Gil Vicente", reputacao: 50 }, { nome: "Farense", reputacao: 45 },
+      { nome: "Portimonense", reputacao: 48 }, { nome: "Chaves", reputacao: 44 },
+      { nome: "Estrela da Amadora", reputacao: 43 }, { nome: "Vizela", reputacao: 42 },
+    ],
+  },
+  {
+    id: "POR2", nome: "Liga Portugal 2", pais: "Portugal", nivel: 2,
+    clubes: [
+      { nome: "Nacional", reputacao: 42 }, { nome: "Feirense", reputacao: 38 },
+      { nome: "Penafiel", reputacao: 37 }, { nome: "Torreense", reputacao: 36 },
+      { nome: "Tondela", reputacao: 41 }, { nome: "Leixoes", reputacao: 36 },
+      { nome: "Mafra", reputacao: 35 }, { nome: "Maritimo", reputacao: 45 },
+      { nome: "Alverca", reputacao: 34 }, { nome: "Academico de Viseu", reputacao: 36 },
+      { nome: "Uniao de Leiria", reputacao: 34 }, { nome: "Oliveirense", reputacao: 33 },
+      { nome: "Pacos de Ferreira", reputacao: 40 }, { nome: "Belenenses", reputacao: 39 },
+    ],
+  },
+  {
+    id: "NED1", nome: "Eredivisie", pais: "Holanda", nivel: 1,
+    clubes: [
+      { nome: "PSV Eindhoven", reputacao: 79 }, { nome: "Feyenoord", reputacao: 77 },
+      { nome: "Ajax", reputacao: 78 }, { nome: "AZ Alkmaar", reputacao: 68 },
+      { nome: "Twente", reputacao: 65 }, { nome: "Utrecht", reputacao: 61 },
+      { nome: "NEC Nijmegen", reputacao: 55 }, { nome: "Sparta Rotterdam", reputacao: 53 },
+      { nome: "Heerenveen", reputacao: 54 }, { nome: "Go Ahead Eagles", reputacao: 52 },
+      { nome: "Fortuna Sittard", reputacao: 48 }, { nome: "Almere City", reputacao: 45 },
+      { nome: "RKC Waalwijk", reputacao: 47 }, { nome: "Excelsior", reputacao: 44 },
+      { nome: "Vitesse", reputacao: 50 }, { nome: "PEC Zwolle", reputacao: 46 },
+      { nome: "Heracles Almelo", reputacao: 47 }, { nome: "Willem II", reputacao: 45 },
+    ],
+  },
+  {
+    id: "NED2", nome: "Eerste Divisie", pais: "Holanda", nivel: 2,
+    clubes: [
+      { nome: "Roda JC", reputacao: 40 }, { nome: "Groningen", reputacao: 48 },
+      { nome: "FC Den Bosch", reputacao: 35 }, { nome: "Cambuur", reputacao: 44 },
+      { nome: "Eindhoven FC", reputacao: 36 }, { nome: "FC Emmen", reputacao: 42 },
+      { nome: "Helmond Sport", reputacao: 34 }, { nome: "Telstar", reputacao: 38 },
+      { nome: "VVV-Venlo", reputacao: 39 }, { nome: "ADO Den Haag", reputacao: 41 },
+      { nome: "De Graafschap", reputacao: 40 }, { nome: "MVV Maastricht", reputacao: 33 },
+      { nome: "FC Dordrecht", reputacao: 34 }, { nome: "Jong AZ", reputacao: 32 },
+      { nome: "Jong Ajax", reputacao: 33 }, { nome: "Jong PSV", reputacao: 33 },
+    ],
+  },
+  {
+    id: "USA1", nome: "MLS", pais: "Estados Unidos", nivel: 1,
+    clubes: [
+      { nome: "Inter Miami", reputacao: 74 }, { nome: "LAFC", reputacao: 72 },
+      { nome: "LA Galaxy", reputacao: 68 }, { nome: "Atlanta United", reputacao: 66 },
+      { nome: "Seattle Sounders", reputacao: 65 }, { nome: "Portland Timbers", reputacao: 62 },
+      { nome: "Sporting Kansas City", reputacao: 61 }, { nome: "FC Dallas", reputacao: 60 },
+      { nome: "Houston Dynamo", reputacao: 58 }, { nome: "Austin FC", reputacao: 57 },
+      { nome: "Real Salt Lake", reputacao: 58 }, { nome: "Colorado Rapids", reputacao: 55 },
+      { nome: "Minnesota United", reputacao: 57 }, { nome: "Nashville SC", reputacao: 60 },
+      { nome: "Orlando City", reputacao: 61 }, { nome: "Charlotte FC", reputacao: 56 },
+      { nome: "Columbus Crew", reputacao: 65 }, { nome: "FC Cincinnati", reputacao: 62 },
+      { nome: "New York City FC", reputacao: 63 }, { nome: "New York Red Bulls", reputacao: 62 },
+      { nome: "Philadelphia Union", reputacao: 61 }, { nome: "DC United", reputacao: 54 },
+      { nome: "Chicago Fire", reputacao: 55 }, { nome: "CF Montreal", reputacao: 53 },
+      { nome: "Toronto FC", reputacao: 56 }, { nome: "New England Revolution", reputacao: 55 },
+      { nome: "San Jose Earthquakes", reputacao: 52 }, { nome: "Vancouver Whitecaps", reputacao: 54 },
+      { nome: "St. Louis City", reputacao: 58 },
+    ],
+  },
+  {
+    id: "MEX1", nome: "Liga MX", pais: "Mexico", nivel: 1,
+    clubes: [
+      { nome: "Club America", reputacao: 71 }, { nome: "Chivas Guadalajara", reputacao: 66 },
+      { nome: "Cruz Azul", reputacao: 67 }, { nome: "Tigres UANL", reputacao: 70 },
+      { nome: "Monterrey", reputacao: 69 }, { nome: "Pumas UNAM", reputacao: 63 },
+      { nome: "Toluca", reputacao: 62 }, { nome: "Leon", reputacao: 61 },
+      { nome: "Santos Laguna", reputacao: 58 }, { nome: "Pachuca", reputacao: 64 },
+      { nome: "Necaxa", reputacao: 54 }, { nome: "Atlas", reputacao: 60 },
+      { nome: "Puebla", reputacao: 53 }, { nome: "Queretaro", reputacao: 50 },
+      { nome: "Mazatlan FC", reputacao: 49 }, { nome: "Juarez FC", reputacao: 48 },
+      { nome: "Tijuana", reputacao: 55 }, { nome: "Atletico San Luis", reputacao: 52 },
+    ],
+  },
+];
+
+// Pares de divisoes que trocam clubes (promocao/rebaixamento) no fim de cada
+// temporada completa. "qtd" e quantos clubes sobem/descem em cada janela.
+const PARES_DIVISAO = [
+  { superior: "BRA1", inferior: "BRA2", qtd: 4 },
+  { superior: "ENG1", inferior: "ENG2", qtd: 3 },
+  { superior: "ESP1", inferior: "ESP2", qtd: 3 },
+  { superior: "ITA1", inferior: "ITA2", qtd: 3 },
+  { superior: "GER1", inferior: "GER2", qtd: 2 },
+  { superior: "FRA1", inferior: "FRA2", qtd: 2 },
+  { superior: "POR1", inferior: "POR2", qtd: 2 },
+  { superior: "NED1", inferior: "NED2", qtd: 2 },
 ];
 
 const NACIONALIDADES = [
@@ -476,20 +612,32 @@ const ESTILOS = [
     bonus: { def: 10, fis: 10 },
   },
 ];
-
-// Nomes usados apenas para gerar jogadores adversarios genericos (nao reais)
-const NOMES_BASE = [
-  "Silva", "Santos", "Costa", "Oliveira", "Pereira", "Almeida", "Ribeiro",
-  "Carvalho", "Gomes", "Martins", "Rocha", "Dias", "Nunes", "Teixeira",
-  "Moreira", "Fernandes", "Correia", "Lopes", "Marques", "Vieira",
-];
 /* ==========================================================================
    FUTCAREER — motor do jogo
    Toda a logica de simulacao fica aqui. A tela (app.js) so le o estado
    e chama estas funcoes; nao ha calculo de jogo dentro da UI.
+
+   Fases da carreira do jogador (jogador.fase):
+     "base"         — categorias de base (comeca aos 6 anos), sem contrato
+     "profissional" — jogador com contrato, disputa a liga do seu clube
+
+   Situacao contratual (jogador.situacaoContratual), valida so na fase pro:
+     "normal"     — vinculado normalmente ao clube atual
+     "emprestado" — emprestado por outro clube (o "dono" guarda o contrato)
+     "livre"      — sem clube, procurando uma nova oportunidade
+
+   Cada meia-temporada (turno) e simulada em ate 3 blocos de rodadas, para
+   que o jogador acompanhe o andamento antes de chegar na janela de
+   transferencias (que so aparece depois do ultimo bloco do turno).
    ========================================================================== */
 
 const SAVE_KEY = "futcareer_save_v1";
+const BLOCOS_POR_TURNO = 3;
+const GRUPOS_FOCO = {
+  ataque: ["atq", "vel"],
+  criacao: ["pas", "dri"],
+  fisico: ["fis", "def"],
+};
 
 function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
 function rnd(min, max) { return Math.random() * (max - min) + min; }
@@ -499,15 +647,27 @@ function pick(arr) { return arr[rndInt(0, arr.length - 1)]; }
 /* ---------- Construcao do clube (runtime) ---------------------------- */
 
 function buildClub(base, leagueId, leagueNivel) {
+  const investimento = clamp(base.reputacao + rndInt(-16, 16), 12, 99);
   return {
     nome: base.nome,
     ligaId: leagueId,
     nivel: leagueNivel,
+    reputacaoBase: base.reputacao,
     reputacao: base.reputacao,
-    orcamento: Math.round(base.reputacao * rnd(0.8, 1.3) * 1_000_000),
+    investimento,
+    orcamento: Math.round((base.reputacao * 0.6 + investimento * 0.4) * rnd(0.9, 1.3) * 1_000_000),
     pontos: 0, jogos: 0, vitorias: 0, empates: 0, derrotas: 0,
     golsPro: 0, golsContra: 0,
   };
+}
+
+function rotuloProjeto(clube) {
+  const diff = clube.investimento - clube.reputacao;
+  if (diff >= 15) return "Projeto em forte ascensao";
+  if (diff >= 6) return "Investindo para crescer";
+  if (diff <= -15) return "Projeto em declinio";
+  if (diff <= -6) return "Perdendo forca financeira";
+  return "Financeiramente estavel";
 }
 
 function novoMundo() {
@@ -535,23 +695,27 @@ function clubesDaLiga(clubes, ligaId) {
 
 function criarJogador({ nome, nacionalidade, posicao, estiloId }) {
   const estilo = ESTILOS.find(e => e.id === estiloId) || ESTILOS[0];
-  const base = { atq: 40, dri: 40, pas: 40, def: 40, fis: 40, vel: 40 };
-  for (const k in base) base[k] += rndInt(-4, 4);
-  for (const k in estilo.bonus) base[k] += estilo.bonus[k];
-  for (const k in base) base[k] = clamp(base[k], 20, 80);
+  const base = { atq: 20, dri: 20, pas: 20, def: 20, fis: 20, vel: 20 };
+  for (const k in base) base[k] += rndInt(-3, 3);
+  for (const k in estilo.bonus) base[k] += Math.round(estilo.bonus[k] * 0.4);
+  for (const k in base) base[k] = clamp(base[k], 10, 35);
 
-  const potencial = clamp(rndInt(65, 95), 65, 99);
-
-  // Clube inicial: um time pequeno/medio da base do futebol nacional do jogador
+  const potencial = clamp(rndInt(60, 95), 60, 99);
   const ligaInicial = LEAGUES.find(l => l.pais === nacionalidade) || LEAGUES[1];
 
   return {
     nome, nacionalidade, posicao, estiloId,
-    idade: 17,
+    idade: 6,
     atributos: base,
     potencial,
-    clubeNome: null, // definido na primeira janela
+    foco: null,
+    fase: "base",
+    clubeNome: null,
+    ligaIdAtual: null,
     ligaIdPreferida: ligaInicial.id,
+    situacaoContratual: "normal",
+    clubeDono: null,
+    emprestimoAte: null,
     contratoAte: null,
     salario: 0,
     valorDeMercado: 0,
@@ -559,6 +723,7 @@ function criarJogador({ nome, nacionalidade, posicao, estiloId }) {
     aposentado: false,
     estatisticasTemporada: statsVazias(),
     estatisticasCarreira: statsVazias(),
+    estatisticasBase: { jogos: 0, gols: 0 },
     historicoClubes: [],
     titulos: [],
   };
@@ -576,7 +741,6 @@ function overall(jogador) {
 }
 
 function poderDoJogador(jogador) {
-  // Combina OVR atual com uma fracao do potencial para calcular interesse de clubes
   return Math.round(overall(jogador) * 0.75 + jogador.potencial * 0.25);
 }
 
@@ -587,7 +751,86 @@ function atualizarValorDeMercado(jogador) {
   jogador.valorDeMercado = Math.round(base / 10000) * 10000;
 }
 
-/* ---------- Mercado de transferencias ----------------------------------- */
+function definirFoco(jogador, foco) {
+  jogador.foco = GRUPOS_FOCO[foco] ? foco : null;
+}
+
+/* ---------- Categorias de base ------------------------------------------- */
+
+function candidatosBaseInicial(estado) {
+  const jogador = estado.jogador;
+  const ligasDoPais = LEAGUES.filter(l => l.pais === jogador.nacionalidade).map(l => l.id);
+  const pool = estado.clubes.filter(c => ligasDoPais.includes(c.ligaId));
+  const baseUsada = pool.length ? pool : estado.clubes;
+  return baseUsada.slice().sort(() => Math.random() - 0.5).slice(0, 6);
+}
+
+function clubesInteressadosBase(estado) {
+  const jogador = estado.jogador;
+  const atual = clubeAtual(estado);
+  const alvo = jogador.potencial;
+  return estado.clubes
+    .filter(c => !atual || c.nome !== atual.nome)
+    .map(c => {
+      const gapRep = Math.abs(c.reputacao - alvo);
+      const bonusInvestimento = clamp((c.investimento - 50) / 40, -0.4, 0.4);
+      return { clube: c, gap: gapRep - bonusInvestimento * 5 };
+    })
+    .filter(x => x.gap <= 22)
+    .sort((a, b) => a.gap - b.gap)
+    .slice(0, 5)
+    .map(x => x.clube);
+}
+
+function assinarNaBase(estado, clube) {
+  const jogador = estado.jogador;
+  jogador.clubeNome = clube.nome;
+  jogador.ligaIdAtual = clube.ligaId;
+  estado.temporadaInicioNoClube = estado.ano;
+}
+
+function chancePromocaoBase(jogador, clube) {
+  if (jogador.idade < 15) return 0;
+  const ovr = overall(jogador);
+  let chance = 0.06 + (jogador.idade - 16) * 0.09;
+  chance += clamp((ovr - clube.reputacao * 0.55) / 120, -0.15, 0.35);
+  return clamp(chance, 0.03, 0.9);
+}
+
+function promoverParaProfissional(estado, clube, forcado) {
+  const jogador = estado.jogador;
+  jogador.fase = "profissional";
+  jogador.clubeNome = clube.nome;
+  jogador.ligaIdAtual = clube.ligaId;
+  jogador.salario = Math.round(calcularSalarioOferta(clube, jogador) * (forcado ? 0.25 : 0.45));
+  jogador.contratoAte = estado.ano + rndInt(2, 3);
+  jogador.situacaoContratual = "normal";
+  estado.temporadaInicioNoClube = estado.ano;
+}
+
+function simularBlocoBase(estado, quantidadeRodadas) {
+  const jogador = estado.jogador;
+  jogador.estatisticasBase = jogador.estatisticasBase || { jogos: 0, gols: 0 };
+  if (jogador.idade < 11) return { jogos: 0, gols: 0 };
+
+  let jogos = 0, gols = 0;
+  for (let i = 0; i < quantidadeRodadas; i++) {
+    if (Math.random() < 0.85) {
+      jogos++;
+      if (["ATA", "MEI"].includes(jogador.posicao)) {
+        const chanceGol = clamp(jogador.atributos.atq / 220, 0.05, 0.6);
+        if (Math.random() < chanceGol) gols++;
+      }
+    }
+  }
+  jogador.estatisticasTemporada.jogos += jogos;
+  jogador.estatisticasTemporada.gols += gols;
+  jogador.estatisticasBase.jogos += jogos;
+  jogador.estatisticasBase.gols += gols;
+  return { jogos, gols };
+}
+
+/* ---------- Mercado de transferencias (profissional) ---------------------- */
 
 function clubeAtual(estado) {
   return estado.clubes.find(c => c.nome === estado.jogador.clubeNome);
@@ -595,11 +838,24 @@ function clubeAtual(estado) {
 
 function clubesInteressados(estado, incluirAtual = false) {
   const jogador = estado.jogador;
-  const poder = poderDoJogador(jogador);
   const atual = clubeAtual(estado);
+  let poder = poderDoJogador(jogador);
+
+  const d = estado.ultimoDesempenho;
+  if (jogador.situacaoContratual !== "livre" && d) {
+    if (d.jogos === 0) poder *= 0.72;
+    else if (d.media !== null && d.media < 5.6) poder *= 0.85;
+    else if (d.media !== null && d.media >= 7.2) poder *= 1.1;
+  }
+
   return estado.clubes
     .filter(c => (incluirAtual ? true : c.nome !== (atual && atual.nome)))
-    .map(c => ({ clube: c, gap: Math.abs(c.reputacao - poder) }))
+    .map(c => {
+      const gapRep = Math.abs(c.reputacao - poder);
+      const orcamentoEmMilhoes = c.orcamento / 1_000_000;
+      const bonusFinanceiro = clamp((orcamentoEmMilhoes - 40) / 40, -0.5, 0.6);
+      return { clube: c, gap: gapRep - bonusFinanceiro * 6 };
+    })
     .filter(x => x.gap <= 22 || x.clube.reputacao <= poder + 6)
     .sort((a, b) => a.gap - b.gap)
     .slice(0, 6)
@@ -608,7 +864,8 @@ function clubesInteressados(estado, incluirAtual = false) {
 
 function calcularSalarioOferta(clube, jogador) {
   const ovr = overall(jogador);
-  const base = (clube.reputacao * 900) + (ovr * 700) + (jogador.potencial * 200);
+  const forcaFinanceira = clube.orcamento / 1_000_000;
+  const base = (clube.reputacao * 700) + (ovr * 650) + (jogador.potencial * 180) + (forcaFinanceira * 25);
   return Math.round(base / 50) * 50;
 }
 
@@ -625,7 +882,102 @@ function assinarComClube(estado, clube) {
   jogador.ligaIdAtual = clube.ligaId;
   jogador.salario = calcularSalarioOferta(clube, jogador);
   jogador.contratoAte = estado.ano + rndInt(2, 4);
+  jogador.situacaoContratual = "normal";
+  jogador.clubeDono = null;
+  jogador.emprestimoAte = null;
   estado.temporadaInicioNoClube = estado.ano;
+}
+
+/* ---------- Risco contratual: sem propostas, emprestimo, dispensa -------- */
+
+function dispensarJogador(estado) {
+  const jogador = estado.jogador;
+  jogador.historicoClubes.push({
+    clube: jogador.clubeNome,
+    de: estado.temporadaInicioNoClube || estado.ano,
+    ate: estado.ano,
+  });
+  jogador.clubeNome = null;
+  jogador.ligaIdAtual = null;
+  jogador.salario = 0;
+  jogador.contratoAte = null;
+  jogador.situacaoContratual = "livre";
+  jogador.clubeDono = null;
+  jogador.emprestimoAte = null;
+}
+
+function emprestarJogador(estado) {
+  const jogador = estado.jogador;
+  const dono = jogador.clubeNome;
+  const candidatos = estado.clubes
+    .filter(c => c.nome !== dono)
+    .map(c => ({ clube: c, gap: Math.abs(c.reputacao - (overall(jogador) - 8)) }))
+    .sort((a, b) => a.gap - b.gap)
+    .slice(0, 5);
+  if (!candidatos.length) return null;
+  const destino = pick(candidatos).clube;
+  jogador.clubeDono = dono;
+  jogador.clubeNome = destino.nome;
+  jogador.ligaIdAtual = destino.ligaId;
+  jogador.situacaoContratual = "emprestado";
+  jogador.emprestimoAte = estado.ano + 1;
+  return { dono, clube: destino.nome };
+}
+
+function avaliarSituacaoContratual(estado) {
+  const jogador = estado.jogador;
+
+  if (jogador.situacaoContratual === "livre") return { tipo: "livre" };
+
+  if (jogador.situacaoContratual === "emprestado") {
+    if (jogador.emprestimoAte && estado.ano >= jogador.emprestimoAte) {
+      const dono = jogador.clubeDono;
+      const clubeDono = estado.clubes.find(c => c.nome === dono);
+      jogador.situacaoContratual = "normal";
+      jogador.clubeDono = null;
+      jogador.emprestimoAte = null;
+      if (clubeDono) {
+        jogador.clubeNome = clubeDono.nome;
+        jogador.ligaIdAtual = clubeDono.ligaId;
+        return { tipo: "retorno_emprestimo", clube: dono };
+      }
+      jogador.situacaoContratual = "livre";
+      jogador.clubeNome = null;
+      jogador.ligaIdAtual = null;
+      return { tipo: "dispensado", motivo: "clube_nao_encontrado" };
+    }
+    return { tipo: "emprestado_continua" };
+  }
+
+  const d = estado.ultimoDesempenho;
+  if (!d) return null;
+
+  if (d.jogos === 0) {
+    const r = Math.random();
+    if (r < 0.28) { dispensarJogador(estado); return { tipo: "dispensado", motivo: "sem_minutos" }; }
+    if (r < 0.60) {
+      const info = emprestarJogador(estado);
+      return info ? { tipo: "emprestado", ...info } : { tipo: "aviso" };
+    }
+    return { tipo: "aviso" };
+  }
+
+  if (d.media !== null && d.media < 5.6) {
+    const r = Math.random();
+    if (r < 0.16) { dispensarJogador(estado); return { tipo: "dispensado", motivo: "desempenho" }; }
+    if (r < 0.38) {
+      const info = emprestarJogador(estado);
+      return info ? { tipo: "emprestado", ...info } : { tipo: "aviso" };
+    }
+  }
+
+  if (jogador.contratoAte !== null && estado.ano >= jogador.contratoAte &&
+      d.media !== null && d.media < 6.2 && Math.random() < 0.35) {
+    dispensarJogador(estado);
+    return { tipo: "dispensado", motivo: "fim_contrato" };
+  }
+
+  return null;
 }
 
 /* ---------- Simulacao de partidas --------------------------------------- */
@@ -642,7 +994,6 @@ function simularPlacar(forcaA, forcaB) {
 }
 
 function poisson(lambda) {
-  // Aproximacao simples e rapida (nao precisa ser estatisticamente perfeita)
   let L = Math.exp(-lambda), k = 0, p = 1;
   do { k++; p *= Math.random(); } while (p > L && k < 9);
   return k - 1;
@@ -655,38 +1006,38 @@ function registrarResultado(clube, golsPro, golsContra) {
   else { clube.derrotas++; }
 }
 
-function gerarRodadas(clubes) {
-  // Round-robin simples (todos contra todos, uma vez) via algoritmo do circulo
-  const lista = [...clubes];
-  if (lista.length % 2 !== 0) lista.push(null); // bye
-  const n = lista.length;
+function gerarRodadasNomes(clubes) {
+  const nomes = clubes.map(c => c.nome);
+  if (nomes.length % 2 !== 0) nomes.push(null);
+  const n = nomes.length;
   const rodadas = [];
   for (let r = 0; r < n - 1; r++) {
     const jogosRodada = [];
     for (let i = 0; i < n / 2; i++) {
-      const a = lista[i], b = lista[n - 1 - i];
+      const a = nomes[i], b = nomes[n - 1 - i];
       if (a && b) jogosRodada.push([a, b]);
     }
     rodadas.push(jogosRodada);
-    lista.splice(1, 0, lista.pop());
+    nomes.splice(1, 0, nomes.pop());
   }
   return rodadas;
 }
 
+function chanceTitularClube(jogador, clube) {
+  const ovr = overall(jogador);
+  return clamp(0.35 + (ovr - clube.reputacao) / 90, 0.08, 0.97);
+}
+
 function simularParticipacaoJogador(estado, foiCasa, golsTime, golsAdversario) {
   const jogador = estado.jogador;
-  const ovr = overall(jogador);
   const clube = clubeAtual(estado);
-  const forcaMedia = clube.reputacao;
-
-  const chanceTitular = clamp(0.35 + (ovr - forcaMedia) / 90, 0.08, 0.97);
-  const titular = Math.random() < chanceTitular;
+  const titular = Math.random() < chanceTitularClube(jogador, clube);
   const stats = jogador.estatisticasTemporada;
 
   if (!titular) return;
 
   stats.jogos++;
-  estado.jogador.estatisticasCarreira.jogos++;
+  jogador.estatisticasCarreira.jogos++;
 
   let nota = 6.0 + rnd(-0.6, 0.6);
 
@@ -721,28 +1072,133 @@ function simularParticipacaoJogador(estado, foiCasa, golsTime, golsAdversario) {
   jogador.estatisticasCarreira.jogosComNota++;
 }
 
-function simularMeiaTemporada(estado) {
-  const liga = clubesDaLiga(estado.clubes, estado.jogador.ligaIdAtual || estado.jogador.ligaIdPreferida);
-  const rodadas = gerarRodadas(liga);
-  const nomeClubeJogador = estado.jogador.clubeNome;
+/* ---------- Simulacao em blocos, com checkpoints dentro do turno --------- */
 
-  for (const rodada of rodadas) {
-    for (const [a, b] of rodada) {
-      const [golsA, golsB] = simularPlacar(forcaClube(a), forcaClube(b));
-      registrarResultado(a, golsA, golsB);
-      registrarResultado(b, golsB, golsA);
-      if (a.nome === nomeClubeJogador) simularParticipacaoJogador(estado, true, golsA, golsB);
-      if (b.nome === nomeClubeJogador) simularParticipacaoJogador(estado, false, golsB, golsA);
+function garantirRodadasDaTemporada(estado) {
+  const chave = `${estado.ano}-${estado.turno}`;
+  if (estado.rodadasChave === chave && estado.rodadasPorLiga) return;
+
+  const idsLigas = [...new Set(estado.clubes.map(c => c.ligaId))];
+  const porLiga = {};
+  let maxRodadas = 0;
+  for (const ligaId of idsLigas) {
+    const liga = clubesDaLiga(estado.clubes, ligaId);
+    const rs = gerarRodadasNomes(liga);
+    porLiga[ligaId] = rs;
+    maxRodadas = Math.max(maxRodadas, rs.length);
+  }
+
+  estado.rodadasChave = chave;
+  estado.rodadasPorLiga = porLiga;
+  estado.indiceRodada = 0;
+  estado.maxRodadas = maxRodadas;
+  estado.faseTurnoNoInicio = estado.jogador.fase;
+  estado.jogador.estatisticasTemporada = statsVazias();
+}
+
+function simularProximoBloco(estado) {
+  garantirRodadasDaTemporada(estado);
+  const jogador = estado.jogador;
+  const faseNoInicio = estado.faseTurnoNoInicio;
+  const nomeClubeJogador = jogador.clubeNome;
+  const porNome = new Map(estado.clubes.map(c => [c.nome, c]));
+
+  const tamanhoBloco = Math.max(1, Math.ceil(estado.maxRodadas / BLOCOS_POR_TURNO));
+  const inicio = estado.indiceRodada;
+  const fim = Math.min(estado.maxRodadas, inicio + tamanhoBloco);
+
+  const jogosAntes = jogador.estatisticasTemporada.jogos;
+  const golsAntes = jogador.estatisticasTemporada.gols;
+  const assistAntes = jogador.estatisticasTemporada.assistencias;
+  const partidasDoBloco = [];
+
+  for (let idx = inicio; idx < fim; idx++) {
+    for (const ligaId in estado.rodadasPorLiga) {
+      const rodadas = estado.rodadasPorLiga[ligaId];
+      if (idx >= rodadas.length) continue;
+      for (const [nomeA, nomeB] of rodadas[idx]) {
+        const a = porNome.get(nomeA), b = porNome.get(nomeB);
+        if (!a || !b) continue;
+        const [golsA, golsB] = simularPlacar(forcaClube(a), forcaClube(b));
+        registrarResultado(a, golsA, golsB);
+        registrarResultado(b, golsB, golsA);
+        if (faseNoInicio === "profissional" && nomeClubeJogador) {
+          if (a.nome === nomeClubeJogador) {
+            const antes = jogador.estatisticasTemporada.jogos;
+            simularParticipacaoJogador(estado, true, golsA, golsB);
+            if (jogador.estatisticasTemporada.jogos > antes) partidasDoBloco.push({ adversario: nomeB, placar: `${golsA}-${golsB}` });
+          }
+          if (b.nome === nomeClubeJogador) {
+            const antes = jogador.estatisticasTemporada.jogos;
+            simularParticipacaoJogador(estado, false, golsB, golsA);
+            if (jogador.estatisticasTemporada.jogos > antes) partidasDoBloco.push({ adversario: nomeA, placar: `${golsB}-${golsA}` });
+          }
+        }
+      }
     }
   }
 
-  // Chance pequena de lesao (so afeta o relato, ja simplificado nas partidas acima)
-  const lesionou = Math.random() < 0.08;
+  let jogosBaseBloco = { jogos: 0, gols: 0 };
+  if (faseNoInicio === "base") {
+    jogosBaseBloco = simularBlocoBase(estado, fim - inicio);
+  }
 
-  crescerAtributos(estado.jogador);
-  atualizarValorDeMercado(estado.jogador);
+  estado.indiceRodada = fim;
+  const concluido = fim >= estado.maxRodadas;
 
-  return { lesionou };
+  const deltaBloco = {
+    jogos: jogador.estatisticasTemporada.jogos - jogosAntes,
+    gols: jogador.estatisticasTemporada.gols - golsAntes,
+    assistencias: jogador.estatisticasTemporada.assistencias - assistAntes,
+    partidas: partidasDoBloco,
+    jogosBase: jogosBaseBloco,
+  };
+
+  let resultadoFinal = null;
+  if (concluido) resultadoFinal = finalizarMeiaTemporada(estado, faseNoInicio);
+
+  return {
+    concluido, deltaBloco, resultadoFinal, faseNoInicio,
+    rodadaAtual: fim, totalRodadas: estado.maxRodadas,
+  };
+}
+
+function finalizarMeiaTemporada(estado, faseNoInicio) {
+  const jogador = estado.jogador;
+  const lesionou = faseNoInicio === "profissional" && Math.random() < 0.08;
+
+  crescerAtributos(jogador);
+  atualizarValorDeMercado(jogador);
+
+  estado.ultimoDesempenho = {
+    jogos: jogador.estatisticasTemporada.jogos,
+    media: jogador.estatisticasTemporada.jogosComNota
+      ? jogador.estatisticasTemporada.notaSoma / jogador.estatisticasTemporada.jogosComNota
+      : null,
+  };
+
+  estado.eventoPromocao = null;
+  estado.eventoContratual = null;
+
+  if (faseNoInicio === "base") {
+    const clube = clubeAtual(estado);
+    if (clube) {
+      const chance = chancePromocaoBase(jogador, clube);
+      const forcarPromocao = jogador.idade >= 20;
+      if (Math.random() < chance || forcarPromocao) {
+        const forcado = forcarPromocao && Math.random() >= chance;
+        promoverParaProfissional(estado, clube, forcado);
+        estado.eventoPromocao = { clube: clube.nome, forcado };
+      }
+    }
+  } else if (faseNoInicio === "profissional") {
+    estado.eventoContratual = avaliarSituacaoContratual(estado);
+  }
+
+  estado.rodadasPorLiga = null;
+  estado.rodadasChave = null;
+
+  return { lesionou, faseNoInicio };
 }
 
 function crescerAtributos(jogador) {
@@ -758,10 +1214,13 @@ function crescerAtributos(jogador) {
   if (desempenho >= 7.0) delta += 0.4;
   if (desempenho <= 5.6 && stats.jogosComNota > 0) delta -= 0.3;
 
+  const atributosFoco = jogador.foco ? (GRUPOS_FOCO[jogador.foco] || []) : [];
   const tetoPotencial = jogador.potencial;
   for (const k in jogador.atributos) {
-    const alvo = jogador.atributos[k] + delta * rnd(0.6, 1.2);
-    jogador.atributos[k] = clamp(alvo, 15, Math.min(99, tetoPotencial + 8));
+    let deltaAttr = delta * rnd(0.6, 1.2);
+    if (atributosFoco.includes(k)) deltaAttr *= 1.5;
+    const alvo = jogador.atributos[k] + deltaAttr;
+    jogador.atributos[k] = clamp(alvo, 10, Math.min(99, tetoPotencial + 8));
   }
 }
 
@@ -771,31 +1230,94 @@ function tabelaOrdenada(clubes, ligaId) {
     .sort((a, b) => (b.pontos - a.pontos) || ((b.golsPro - b.golsContra) - (a.golsPro - a.golsContra)));
 }
 
+function evoluirClubes(estado) {
+  const idsLigas = [...new Set(estado.clubes.map(c => c.ligaId))];
+  for (const ligaId of idsLigas) {
+    const tabela = tabelaOrdenada(estado.clubes, ligaId);
+    const n = tabela.length;
+    if (n < 2) continue;
+    tabela.forEach((c, i) => {
+      const posRelativa = i / (n - 1);
+      const fatorResultado = 0.5 - posRelativa;
+
+      const deltaOrcamento = fatorResultado * 0.05 + (c.investimento - 50) / 900;
+      c.orcamento = Math.max(1_500_000, Math.round(c.orcamento * (1 + deltaOrcamento)));
+
+      const alvo = clamp(c.investimento + fatorResultado * 10, 15, 99);
+      c.reputacao = clamp(c.reputacao + (alvo - c.reputacao) * 0.12, 18, 99);
+    });
+  }
+}
+
+function aplicarPromocaoRebaixamento(estado) {
+  const movimentos = [];
+  for (const par of PARES_DIVISAO) {
+    const tabelaSuperior = tabelaOrdenada(estado.clubes, par.superior);
+    const tabelaInferior = tabelaOrdenada(estado.clubes, par.inferior);
+    const rebaixados = tabelaSuperior.slice(-par.qtd);
+    const promovidos = tabelaInferior.slice(0, par.qtd);
+
+    for (const c of rebaixados) {
+      c.ligaId = par.inferior; c.nivel = 2;
+      movimentos.push({ clube: c.nome, de: par.superior, para: par.inferior, subiu: false });
+    }
+    for (const c of promovidos) {
+      c.ligaId = par.superior; c.nivel = 1;
+      movimentos.push({ clube: c.nome, de: par.inferior, para: par.superior, subiu: true });
+    }
+  }
+  return movimentos;
+}
+
 /* ---------- Ciclo de temporada ------------------------------------------- */
 
 function avancarParaProximaJanela(estado) {
   const jogador = estado.jogador;
-  jogador.estatisticasTemporada = statsVazias();
+  estado.movimentosDivisao = [];
 
   if (estado.turno === 1) {
-    estado.turno = 2; // vira o returno, mesma temporada
+    estado.turno = 2;
   } else {
-    // fim de temporada: definir campeao, atualizar idade, resetar tabela
-    const tabela = tabelaOrdenada(estado.clubes, jogador.ligaIdAtual || jogador.ligaIdPreferida);
+    const ligaAtualId = jogador.ligaIdAtual || jogador.ligaIdPreferida;
+    const tabela = tabelaOrdenada(estado.clubes, ligaAtualId);
     const campeao = tabela[0];
     estado.ultimoCampeao = campeao ? campeao.nome : null;
     if (campeao && campeao.nome === jogador.clubeNome) {
-      jogador.titulos.push(`${estado.ano} — Campeao (${LEAGUES.find(l => l.id === (jogador.ligaIdAtual || jogador.ligaIdPreferida)).nome})`);
+      const liga = LEAGUES.find(l => l.id === ligaAtualId);
+      jogador.titulos.push(`${estado.ano} — Campeao (${liga ? liga.nome : ligaAtualId})`);
     }
+
+    if (jogador.fase === "profissional") {
+      const inicio = estado.statsInicioTemporada || statsVazias();
+      const golsTemporada = jogador.estatisticasCarreira.gols - inicio.gols;
+      const notaSomaTemporada = jogador.estatisticasCarreira.notaSoma - inicio.notaSoma;
+      const jogosComNotaTemporada = jogador.estatisticasCarreira.jogosComNota - inicio.jogosComNota;
+      const mediaTemporada = jogosComNotaTemporada > 0 ? notaSomaTemporada / jogosComNotaTemporada : null;
+
+      if (golsTemporada >= 20) {
+        jogador.titulos.push(`${estado.ano} — Artilheiro da temporada (${golsTemporada} gols)`);
+      }
+      if (mediaTemporada !== null && jogosComNotaTemporada >= 20 && mediaTemporada >= 7.6) {
+        jogador.titulos.push(`${estado.ano} — Eleito o melhor jogador da temporada`);
+      }
+    }
+
+    evoluirClubes(estado);
+    estado.movimentosDivisao = aplicarPromocaoRebaixamento(estado);
     resetarTabela(estado.clubes);
+
+    const clubeDoJogador = estado.clubes.find(c => c.nome === jogador.clubeNome);
+    if (clubeDoJogador) jogador.ligaIdAtual = clubeDoJogador.ligaId;
+
     estado.ano += 1;
     estado.turno = 1;
     jogador.idade += 1;
+    estado.statsInicioTemporada = { ...jogador.estatisticasCarreira };
   }
 }
 
 function jogadorDeveConsiderarAposentadoria(jogador) {
-  return jogador.idade >= 33;
+  return jogador.fase === "profissional" && jogador.idade >= 33;
 }
 
 function aposentar(jogador) {
@@ -839,7 +1361,7 @@ function iniciarTela() {
       <div class="abertura-marca">
         <span class="abertura-numero">10</span>
         <h1>FUTCAREER</h1>
-        <p class="subt">Monte a carreira do seu jogador, temporada a temporada.</p>
+        <p class="subt">Monte a carreira do seu jogador, desde os 6 anos ate a aposentadoria.</p>
       </div>
       <div class="abertura-acoes">
         <button class="btn btn-primario" id="btn-nova-carreira">Nova carreira</button>
@@ -851,7 +1373,7 @@ function iniciarTela() {
   const btnContinuar = document.getElementById("btn-continuar");
   if (btnContinuar) btnContinuar.addEventListener("click", () => {
     estado = salvo;
-    if (!estado.jogador.clubeNome) telaEscolhaClube(); else telaDashboard();
+    telaDashboard();
   });
 }
 
@@ -871,6 +1393,7 @@ function telaCriacao() {
   app.innerHTML = `
     <section class="tela tela-criacao">
       <h2>Crie seu jogador</h2>
+      <p class="texto-apoio">Voce comeca com 6 anos, dando os primeiros chutes na bola.</p>
       <div class="campo">
         <label for="input-nome">Nome</label>
         <input id="input-nome" type="text" maxlength="24" placeholder="Ex: Bruno Andrade">
@@ -881,7 +1404,7 @@ function telaCriacao() {
           <select id="select-nacionalidade">${opcoesNacionalidade}</select>
         </div>
         <div class="campo">
-          <label for="select-posicao">Posicao</label>
+          <label for="select-posicao">Posicao favorita</label>
           <select id="select-posicao">${opcoesPosicao}</select>
         </div>
       </div>
@@ -906,59 +1429,40 @@ function telaCriacao() {
       ano: new Date().getFullYear(),
       turno: 1,
       ultimoCampeao: null,
+      ultimoDesempenho: null,
+      eventoPromocao: null,
+      eventoContratual: null,
+      movimentosDivisao: [],
+      statsInicioTemporada: null,
+      rodadasPorLiga: null,
+      rodadasChave: null,
+      indiceRodada: 0,
+      maxRodadas: 0,
+      faseTurnoNoInicio: null,
     };
-    telaEscolhaClube();
-  });
-}
-
-function telaEscolhaClube() {
-  const candidatos = clubesInteressados(estado, true)
-    .filter(c => c.nivel >= 2 || c.reputacao <= 65)
-    .slice(0, 5);
-  const lista = (candidatos.length ? candidatos : estado.clubes.filter(c => c.nivel === 2).slice(0, 5))
-    .map((c, i) => `
-      <div class="cartao-clube">
-        <div class="cartao-clube-topo">
-          <strong>${c.nome}</strong>
-          <span class="tag">${nomeLiga(c.ligaId)}</span>
-        </div>
-        <div class="cartao-clube-info">
-          <span>Reputacao: ${c.reputacao}</span>
-          <span>Salario estimado: R$ ${calcularSalarioOferta(c, estado.jogador).toLocaleString("pt-BR")}/mes</span>
-        </div>
-        <button class="btn btn-secundario" data-clube="${c.nome}">Assinar contrato</button>
-      </div>
-    `).join("");
-
-  app.innerHTML = `
-    <section class="tela tela-mercado">
-      <h2>Primeiro contrato profissional</h2>
-      <p class="texto-apoio">Clubes dispostos a te dar uma chance no time principal:</p>
-      <div class="lista-clubes">${lista}</div>
-    </section>
-  `;
-
-  document.querySelectorAll("[data-clube]").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const clube = estado.clubes.find(c => c.nome === btn.dataset.clube);
-      assinarComClube(estado, clube);
-      salvarEstado(estado);
-      telaDashboard();
-    });
+    telaMercado();
   });
 }
 
 function cartaoJogadorHTML() {
   const j = estado.jogador;
   const ovr = overall(j);
+  const infoClube = j.clubeNome
+    ? `${j.clubeNome} (${nomeLiga(j.ligaIdAtual)})${j.situacaoContratual === "emprestado" ? ` — emprestado por ${j.clubeDono}` : ""}`
+    : "Sem clube";
+  const clube = clubeAtual(estado);
+  const chanceTitularTxt = (j.fase === "profissional" && clube)
+    ? `<p class="texto-apoio">Chance de ser titular: <strong>${Math.round(chanceTitularClube(j, clube) * 100)}%</strong></p>`
+    : "";
   return `
     <div class="cartao-jogador">
       <div class="cartao-jogador-ovr">${ovr}</div>
       <div class="cartao-jogador-dados">
         <h3>${j.nome}</h3>
-        <p>${POSICOES[j.posicao].label} · ${j.idade} anos · ${j.nacionalidade}</p>
-        <p class="destaque">${j.clubeNome || "Sem clube"} (${nomeLiga(j.ligaIdAtual || j.ligaIdPreferida)})</p>
-        <p class="texto-apoio">Potencial: ${j.potencial} · Valor de mercado: R$ ${j.valorDeMercado.toLocaleString("pt-BR")}</p>
+        <p>${POSICOES[j.posicao].label} · ${j.idade} anos · ${j.nacionalidade}${j.fase === "base" ? " · Categoria de base" : ""}</p>
+        <p class="destaque">${infoClube}</p>
+        <p class="texto-apoio">Potencial: ${j.potencial}${j.fase === "profissional" ? ` · Valor de mercado: R$ ${j.valorDeMercado.toLocaleString("pt-BR")}` : ""}</p>
+        ${chanceTitularTxt}
       </div>
     </div>
   `;
@@ -983,7 +1487,76 @@ function tabelaHTML() {
   `;
 }
 
+function seletorFocoHTML() {
+  const j = estado.jogador;
+  if (j.idade > 29) return "";
+  const opcoes = [
+    { id: "ataque", label: "Ataque e velocidade" },
+    { id: "criacao", label: "Passe e drible" },
+    { id: "fisico", label: "Fisico e defesa" },
+  ];
+  const botoes = opcoes.map(o => `
+    <button class="btn-foco ${j.foco === o.id ? "btn-foco-ativo" : ""}" data-foco="${o.id}">${o.label}</button>
+  `).join("");
+  return `
+    <div class="bloco-foco">
+      <p class="texto-apoio">Foco de treino para o proximo trecho da temporada:</p>
+      <div class="linha-foco">${botoes}</div>
+    </div>
+  `;
+}
+
+function ligarSeletorFoco() {
+  document.querySelectorAll("[data-foco]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      definirFoco(estado.jogador, btn.dataset.foco);
+      salvarEstado(estado);
+      telaDashboard();
+    });
+  });
+}
+
+/* ---------- Dashboard (roteador por fase/situacao) ------------------------ */
+
 function telaDashboard() {
+  const j = estado.jogador;
+  if (j.fase === "base") return telaDashboardBase();
+  if (j.situacaoContratual === "livre") return telaSemClube();
+  telaDashboardProfissional();
+}
+
+function handleSimular() {
+  const bloco = simularProximoBloco(estado);
+  salvarEstado(estado);
+  if (bloco.concluido) telaResultado(bloco.resultadoFinal);
+  else telaAndamento(bloco);
+}
+
+function telaDashboardBase() {
+  const j = estado.jogador;
+  app.innerHTML = `
+    <section class="tela tela-dashboard">
+      <header class="barra-topo">
+        <span class="marca">FUTCAREER</span>
+        <span>${estado.ano} · ${estado.turno === 1 ? "1º turno" : "2º turno"} · Base</span>
+      </header>
+      ${cartaoJogadorHTML()}
+      ${j.idade < 11 ? `<p class="texto-apoio">Ainda muito novo para jogos oficiais: o foco e o treino e a diversao com a bola.</p>` : `<p class="texto-apoio">Voce ja disputa jogos pela categoria de base.</p>`}
+      <p class="texto-apoio">Time principal do clube que revela o seu jogador:</p>
+      ${tabelaHTML()}
+      ${seletorFocoHTML()}
+      <div class="acoes">
+        <button class="btn btn-primario" id="btn-simular">Simular proximas rodadas</button>
+        <button class="btn btn-secundario" id="btn-carreira">Ver estatisticas de carreira</button>
+      </div>
+    </section>
+  `;
+  document.getElementById("btn-simular").addEventListener("click", handleSimular);
+  document.getElementById("btn-carreira").addEventListener("click", telaResumoCarreira);
+  ligarSeletorFoco();
+}
+
+function telaDashboardProfissional() {
   const j = estado.jogador;
   const podeAposentar = jogadorDeveConsiderarAposentadoria(j);
   app.innerHTML = `
@@ -994,18 +1567,43 @@ function telaDashboard() {
       </header>
       ${cartaoJogadorHTML()}
       ${tabelaHTML()}
+      ${seletorFocoHTML()}
       <div class="acoes">
-        <button class="btn btn-primario" id="btn-simular">Simular temporada</button>
+        <button class="btn btn-primario" id="btn-simular">Simular proximas rodadas</button>
         <button class="btn btn-secundario" id="btn-carreira">Ver estatisticas de carreira</button>
         ${podeAposentar ? `<button class="btn btn-perigo" id="btn-aposentar">Encerrar carreira</button>` : ""}
       </div>
     </section>
   `;
-  document.getElementById("btn-simular").addEventListener("click", () => {
-    const resultado = simularMeiaTemporada(estado);
+  document.getElementById("btn-simular").addEventListener("click", handleSimular);
+  document.getElementById("btn-carreira").addEventListener("click", telaResumoCarreira);
+  const btnAposentar = document.getElementById("btn-aposentar");
+  if (btnAposentar) btnAposentar.addEventListener("click", () => {
+    aposentar(j);
     salvarEstado(estado);
-    telaResultado(resultado);
+    telaResumoCarreira();
   });
+  ligarSeletorFoco();
+}
+
+function telaSemClube() {
+  const j = estado.jogador;
+  app.innerHTML = `
+    <section class="tela tela-dashboard">
+      <header class="barra-topo">
+        <span class="marca">FUTCAREER</span>
+        <span>${estado.ano} · ${estado.turno === 1 ? "1º turno" : "2º turno"}</span>
+      </header>
+      ${cartaoJogadorHTML()}
+      <p class="aviso">Voce esta sem clube no momento. Procure uma nova oportunidade no mercado.</p>
+      <div class="acoes">
+        <button class="btn btn-primario" id="btn-mercado">Procurar clube</button>
+        <button class="btn btn-secundario" id="btn-carreira">Ver estatisticas de carreira</button>
+        ${jogadorDeveConsiderarAposentadoria(j) ? `<button class="btn btn-perigo" id="btn-aposentar">Encerrar carreira</button>` : ""}
+      </div>
+    </section>
+  `;
+  document.getElementById("btn-mercado").addEventListener("click", () => telaMercado(false));
   document.getElementById("btn-carreira").addEventListener("click", telaResumoCarreira);
   const btnAposentar = document.getElementById("btn-aposentar");
   if (btnAposentar) btnAposentar.addEventListener("click", () => {
@@ -1015,10 +1613,142 @@ function telaDashboard() {
   });
 }
 
+/* ---------- Andamento da temporada (checkpoints antes do fim do turno) --- */
+
+function telaAndamento(bloco) {
+  if (bloco.faseNoInicio === "base") return telaAndamentoBase(bloco);
+  telaAndamentoProfissional(bloco);
+}
+
+function telaAndamentoBase(bloco) {
+  const j = estado.jogador;
+  const d = bloco.deltaBloco;
+  app.innerHTML = `
+    <section class="tela tela-andamento">
+      <header class="barra-topo">
+        <span class="marca">FUTCAREER</span>
+        <span>${estado.ano} · ${estado.turno === 1 ? "1º turno" : "2º turno"} · rodada ${bloco.rodadaAtual}/${bloco.totalRodadas}</span>
+      </header>
+      ${cartaoJogadorHTML()}
+      ${j.idade >= 11 ? `
+        <h3>Neste trecho</h3>
+        <div class="grade-stats">
+          <div><span class="numero">${d.jogosBase.jogos}</span><span>Jogos na base</span></div>
+          <div><span class="numero">${d.jogosBase.gols}</span><span>Gols na base</span></div>
+        </div>
+        <p class="texto-apoio">Acumulado na temporada: ${j.estatisticasTemporada.jogos} jogos, ${j.estatisticasTemporada.gols} gols.</p>
+      ` : `<p class="texto-apoio">Voce segue treinando enquanto o time principal do seu clube disputa a temporada:</p>`}
+      ${tabelaHTML()}
+      <button class="btn btn-primario" id="btn-continuar-simulando">Continuar temporada</button>
+    </section>
+  `;
+  document.getElementById("btn-continuar-simulando").addEventListener("click", handleSimular);
+}
+
+function telaAndamentoProfissional(bloco) {
+  const j = estado.jogador;
+  const d = bloco.deltaBloco;
+  const stats = j.estatisticasTemporada;
+  const media = stats.jogosComNota ? (stats.notaSoma / stats.jogosComNota).toFixed(1) : "—";
+  const partidasTxt = d.partidas.length
+    ? d.partidas.map(p => `vs ${p.adversario} (${p.placar})`).join(" · ")
+    : "Voce ficou no banco neste trecho.";
+
+  app.innerHTML = `
+    <section class="tela tela-andamento">
+      <header class="barra-topo">
+        <span class="marca">FUTCAREER</span>
+        <span>${estado.ano} · ${estado.turno === 1 ? "1º turno" : "2º turno"} · rodada ${bloco.rodadaAtual}/${bloco.totalRodadas}</span>
+      </header>
+      ${cartaoJogadorHTML()}
+      <h3>Neste trecho</h3>
+      <div class="grade-stats">
+        <div><span class="numero">${d.jogos}</span><span>Jogos</span></div>
+        <div><span class="numero">${d.gols}</span><span>Gols</span></div>
+        <div><span class="numero">${d.assistencias}</span><span>Assistencias</span></div>
+      </div>
+      <p class="texto-apoio">${partidasTxt}</p>
+      <h3>Acumulado na temporada</h3>
+      <div class="grade-stats">
+        <div><span class="numero">${stats.jogos}</span><span>Jogos</span></div>
+        <div><span class="numero">${stats.gols}</span><span>Gols</span></div>
+        <div><span class="numero">${stats.assistencias}</span><span>Assistencias</span></div>
+        <div><span class="numero">${media}</span><span>Nota media</span></div>
+      </div>
+      ${tabelaHTML()}
+      <button class="btn btn-primario" id="btn-continuar-simulando">Continuar temporada</button>
+    </section>
+  `;
+  document.getElementById("btn-continuar-simulando").addEventListener("click", handleSimular);
+}
+
+/* ---------- Resultado do turno (roteador por fase) ------------------------ */
+
 function telaResultado(resultado) {
+  if (resultado.faseNoInicio === "base") return telaResultadoBase(resultado);
+  return telaResultadoProfissional(resultado);
+}
+
+function telaResultadoBase(resultado) {
+  const j = estado.jogador;
+  const promo = estado.eventoPromocao;
+  const stats = j.estatisticasTemporada;
+  app.innerHTML = `
+    <section class="tela tela-resultado">
+      <h2>Fim do ${estado.turno === 1 ? "1º" : "2º"} turno — ${estado.ano} (categoria de base)</h2>
+      ${cartaoJogadorHTML()}
+      ${j.idade >= 11 ? `
+        <div class="grade-stats">
+          <div><span class="numero">${stats.jogos}</span><span>Jogos na base</span></div>
+          <div><span class="numero">${stats.gols}</span><span>Gols na base</span></div>
+        </div>
+      ` : `<p class="texto-apoio">Ainda muito novo para jogos oficiais — o foco e o treino e o desenvolvimento.</p>`}
+      <p class="texto-apoio">Potencial estimado pela comissao tecnica: ${j.potencial}</p>
+      ${promo
+        ? `<p class="aviso aviso-campeao">${promo.forcado
+            ? `Sem grandes garantias, mas voce assinou seu primeiro contrato profissional com o <strong>${promo.clube}</strong>.`
+            : `Voce foi promovido ao elenco profissional do <strong>${promo.clube}</strong>!`}</p>`
+        : `<p class="texto-apoio">Ainda nas categorias de base. Continue treinando para ganhar uma chance no time principal.</p>`}
+      <button class="btn btn-primario" id="btn-para-mercado">Continuar</button>
+    </section>
+  `;
+  document.getElementById("btn-para-mercado").addEventListener("click", () => {
+    const anoAntes = estado.ano;
+    avancarParaProximaJanela(estado);
+    salvarEstado(estado);
+    telaMercado(anoAntes !== estado.ano);
+  });
+}
+
+function telaResultadoProfissional(resultado) {
   const j = estado.jogador;
   const stats = j.estatisticasTemporada;
   const media = stats.jogosComNota ? (stats.notaSoma / stats.jogosComNota).toFixed(1) : "—";
+  const ec = estado.eventoContratual;
+
+  let mensagemContratual = "";
+  if (ec) {
+    if (ec.tipo === "dispensado") {
+      const motivos = {
+        sem_minutos: "poucas chances de jogo",
+        desempenho: "baixo desempenho em campo",
+        fim_contrato: "fim de contrato sem renovacao",
+        clube_nao_encontrado: "reestruturacao do clube",
+      };
+      mensagemContratual = `<p class="aviso">Seu contrato foi rescindido (${motivos[ec.motivo] || "decisao do clube"}). Voce esta sem clube.</p>`;
+    } else if (ec.tipo === "emprestado") {
+      mensagemContratual = `<p class="aviso">Voce foi emprestado pelo <strong>${ec.dono}</strong> ao <strong>${ec.clube}</strong>.</p>`;
+    } else if (ec.tipo === "retorno_emprestimo") {
+      mensagemContratual = `<p class="aviso aviso-campeao">Seu emprestimo terminou — voce voltou ao <strong>${ec.clube}</strong>.</p>`;
+    } else if (ec.tipo === "aviso") {
+      mensagemContratual = `<p class="aviso">Voce teve poucas chances nesse turno. A comissao tecnica esta de olho no seu desempenho.</p>`;
+    }
+  }
+
+  const novosTitulos = (j.titulos || []).filter(t => t.startsWith(`${estado.ano} —`));
+  const mensagemTitulos = novosTitulos.length
+    ? `<p class="aviso aviso-campeao">${novosTitulos.join("<br>")}</p>` : "";
+
   app.innerHTML = `
     <section class="tela tela-resultado">
       <h2>Fim do ${estado.turno === 1 ? "1º" : "2º"} turno — ${estado.ano}</h2>
@@ -1029,6 +1759,8 @@ function telaResultado(resultado) {
         <div><span class="numero">${media}</span><span>Nota media</span></div>
       </div>
       ${resultado.lesionou ? `<p class="aviso">Voce sofreu uma lesao ao longo do turno e desfalcou o time em algumas partidas.</p>` : ""}
+      ${mensagemContratual}
+      ${mensagemTitulos}
       ${tabelaHTML()}
       <button class="btn btn-primario" id="btn-para-mercado">Ir para a janela de transferencias</button>
     </section>
@@ -1041,31 +1773,135 @@ function telaResultado(resultado) {
   });
 }
 
+/* ---------- Janela de transferencias (roteador por fase/situacao) --------- */
+
 function telaMercado(temporadaVirou) {
   const j = estado.jogador;
-  const atual = clubeAtual(estado);
-  const opcoes = clubesInteressados(estado, false);
-  const cartoes = opcoes.map(c => `
+  if (j.fase === "base") return telaMercadoBase();
+  if (j.situacaoContratual === "emprestado") return telaMercadoEmprestado(temporadaVirou);
+  if (j.situacaoContratual === "livre") return telaMercadoLivre(temporadaVirou);
+  telaMercadoNormal(temporadaVirou);
+}
+
+function cartaoClubeHTML(c, { rotulo, extra }) {
+  const orcamentoM = Math.round(c.orcamento / 1_000_000);
+  return `
     <div class="cartao-clube">
       <div class="cartao-clube-topo">
         <strong>${c.nome}</strong>
         <span class="tag">${nomeLiga(c.ligaId)}</span>
       </div>
       <div class="cartao-clube-info">
-        <span>Reputacao: ${c.reputacao}</span>
-        <span>Salario estimado: R$ ${calcularSalarioOferta(c, j).toLocaleString("pt-BR")}/mes</span>
+        <span>Reputacao: ${Math.round(c.reputacao)}</span>
+        <span>Orcamento: R$ ${orcamentoM}M</span>
       </div>
-      <button class="btn btn-secundario" data-clube="${c.nome}">Assinar</button>
+      <div class="cartao-clube-info">
+        <span class="destaque-projeto">${rotuloProjeto(c)}</span>
+        ${extra ? `<span>${extra}</span>` : ""}
+      </div>
+      <button class="btn btn-secundario" data-clube="${c.nome}">${rotulo}</button>
     </div>
-  `).join("");
+  `;
+}
+
+function telaMercadoBase() {
+  const j = estado.jogador;
+  const atual = clubeAtual(estado);
+  const opcoes = atual ? clubesInteressadosBase(estado) : candidatosBaseInicial(estado);
+  const cartoes = opcoes.map(c => cartaoClubeHTML(c, {
+    rotulo: atual ? "Transferir para a base" : "Entrar na base",
+    extra: `Time principal na ${nomeLiga(c.ligaId)}`,
+  })).join("");
+
+  app.innerHTML = `
+    <section class="tela tela-mercado">
+      <h2>Categorias de base</h2>
+      ${atual
+        ? `<p class="texto-apoio">Voce esta na base do <strong>${atual.nome}</strong>, ${j.idade} anos.</p>`
+        : `<p class="texto-apoio">Escolha um clube para comecar nas categorias de base:</p>`}
+      <div class="lista-clubes">${cartoes || "<p class='texto-apoio'>Nenhuma proposta de base no momento.</p>"}</div>
+      ${atual ? `<button class="btn btn-primario" id="btn-permanecer">Permanecer na base</button>` : ""}
+    </section>
+  `;
+
+  document.querySelectorAll("[data-clube]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const clube = estado.clubes.find(c => c.nome === btn.dataset.clube);
+      assinarNaBase(estado, clube);
+      salvarEstado(estado);
+      telaDashboard();
+    });
+  });
+  const btnPermanecer = document.getElementById("btn-permanecer");
+  if (btnPermanecer) btnPermanecer.addEventListener("click", () => { salvarEstado(estado); telaDashboard(); });
+}
+
+function telaMercadoEmprestado(temporadaVirou) {
+  const j = estado.jogador;
+  app.innerHTML = `
+    <section class="tela tela-mercado">
+      ${temporadaVirou && estado.ultimoCampeao ? `<p class="aviso aviso-campeao">Campeao de ${estado.ano - 1}: <strong>${estado.ultimoCampeao}</strong></p>` : ""}
+      <h2>Emprestado</h2>
+      <p class="texto-apoio">Voce esta emprestado pelo <strong>${j.clubeDono}</strong> ao <strong>${j.clubeNome}</strong>, retorno previsto para ${j.emprestimoAte}.</p>
+      <button class="btn btn-primario" id="btn-continuar">Continuar</button>
+    </section>
+  `;
+  document.getElementById("btn-continuar").addEventListener("click", () => { salvarEstado(estado); telaDashboard(); });
+}
+
+function telaMercadoLivre(temporadaVirou) {
+  const j = estado.jogador;
+  const opcoes = clubesInteressados(estado, false);
+  const cartoes = opcoes.map(c => cartaoClubeHTML(c, {
+    rotulo: "Assinar contrato",
+    extra: `Salario estimado: R$ ${calcularSalarioOferta(c, j).toLocaleString("pt-BR")}/mes`,
+  })).join("");
+
+  app.innerHTML = `
+    <section class="tela tela-mercado">
+      ${temporadaVirou && estado.ultimoCampeao ? `<p class="aviso aviso-campeao">Campeao de ${estado.ano - 1}: <strong>${estado.ultimoCampeao}</strong></p>` : ""}
+      <h2>Sem clube</h2>
+      <p class="texto-apoio">Propostas disponiveis no momento:</p>
+      <div class="lista-clubes">${cartoes || "<p class='texto-apoio'>Nenhum clube disposto a contratar agora. Tente novamente na proxima janela.</p>"}</div>
+      <button class="btn btn-secundario" id="btn-aguardar">Aguardar proxima janela</button>
+    </section>
+  `;
+
+  document.querySelectorAll("[data-clube]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const clube = estado.clubes.find(c => c.nome === btn.dataset.clube);
+      assinarComClube(estado, clube);
+      salvarEstado(estado);
+      telaDashboard();
+    });
+  });
+  document.getElementById("btn-aguardar").addEventListener("click", () => {
+    const bloco = simularProximoBloco(estado);
+    if (!bloco.concluido) { salvarEstado(estado); telaAndamento(bloco); return; }
+    avancarParaProximaJanela(estado);
+    salvarEstado(estado);
+    telaMercado(true);
+  });
+}
+
+function telaMercadoNormal(temporadaVirou) {
+  const j = estado.jogador;
+  const atual = clubeAtual(estado);
+  const movimentoDoClube = (estado.movimentosDivisao || []).find(m => m.clube === (atual && atual.nome));
+  const opcoes = clubesInteressados(estado, false);
+  const cartoes = opcoes.map(c => cartaoClubeHTML(c, {
+    rotulo: "Assinar",
+    extra: `Salario estimado: R$ ${calcularSalarioOferta(c, j).toLocaleString("pt-BR")}/mes`,
+  })).join("");
 
   app.innerHTML = `
     <section class="tela tela-mercado">
       ${temporadaVirou && estado.ultimoCampeao ? `<p class="aviso aviso-campeao">Campeao de ${estado.ano - 1}: <strong>${estado.ultimoCampeao}</strong>${estado.ultimoCampeao === (atual && atual.nome) ? " — parabens, voce e campeao!" : ""}</p>` : ""}
+      ${movimentoDoClube ? `<p class="aviso ${movimentoDoClube.subiu ? "aviso-campeao" : ""}">${atual.nome} ${movimentoDoClube.subiu ? "foi promovido para" : "foi rebaixado para"} <strong>${nomeLiga(movimentoDoClube.para)}</strong>.</p>` : ""}
       <h2>Janela de transferencias</h2>
       <p class="texto-apoio">Clube atual: <strong>${atual ? atual.nome : "—"}</strong> · Contrato ate ${j.contratoAte}</p>
       <div class="lista-clubes">
-        ${cartoes || "<p class='texto-apoio'>Nenhum clube com interesse forte no momento.</p>"}
+        ${cartoes || "<p class='texto-apoio'>Nenhum clube com interesse forte no momento — seu desempenho recente afastou propostas.</p>"}
       </div>
       <button class="btn btn-primario" id="btn-permanecer">Permanecer no clube atual</button>
     </section>
@@ -1085,9 +1921,12 @@ function telaMercado(temporadaVirou) {
   });
 }
 
+/* ---------- Resumo de carreira --------------------------------------------- */
+
 function telaResumoCarreira() {
   const j = estado.jogador;
   const c = j.estatisticasCarreira;
+  const b = j.estatisticasBase || { jogos: 0, gols: 0 };
   const media = c.jogosComNota ? (c.notaSoma / c.jogosComNota).toFixed(1) : "—";
   const historico = [...j.historicoClubes, j.clubeNome ? { clube: j.clubeNome, de: estado.temporadaInicioNoClube, ate: estado.ano } : null]
     .filter(Boolean)
@@ -1098,16 +1937,17 @@ function telaResumoCarreira() {
     <section class="tela tela-resumo">
       <h2>${j.aposentado ? "Carreira encerrada" : "Estatisticas de carreira"}</h2>
       ${cartaoJogadorHTML()}
+      ${b.jogos > 0 ? `<p class="texto-apoio">Nas categorias de base: ${b.jogos} jogos, ${b.gols} gols.</p>` : ""}
       <div class="grade-stats">
-        <div><span class="numero">${c.jogos}</span><span>Jogos</span></div>
-        <div><span class="numero">${c.gols}</span><span>Gols</span></div>
+        <div><span class="numero">${c.jogos}</span><span>Jogos (pro)</span></div>
+        <div><span class="numero">${c.gols}</span><span>Gols (pro)</span></div>
         <div><span class="numero">${c.assistencias}</span><span>Assistencias</span></div>
         <div><span class="numero">${media}</span><span>Nota media</span></div>
       </div>
-      <h3>Titulos</h3>
+      <h3>Titulos e premios</h3>
       ${titulos}
       <h3>Clubes</h3>
-      <ul>${historico}</ul>
+      <ul>${historico || "<li>Nenhum ainda.</li>"}</ul>
       <div class="acoes">
         ${j.aposentado
           ? `<button class="btn btn-primario" id="btn-nova-vida">Comecar nova carreira</button>`
