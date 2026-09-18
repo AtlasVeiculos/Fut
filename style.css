@@ -1,0 +1,258 @@
+/* ==========================================================================
+   FUTCAREER — identidade visual
+   Paleta: gramado a noite sob holofotes.
+   --night        #0A1620   fundo principal (tunel do estadio)
+   --pitch        #163524   painel principal (gramado escuro)
+   --pitch-light  #1F5138   painel secundario / hover
+   --floodlight   #F2C744   destaque, botao principal, OVR
+   --chalk        #EDF3EE   texto principal sobre fundo escuro
+   --card-red     #E4572E   avisos, encerrar carreira
+   ========================================================================== */
+
+:root {
+  --night: #0A1620;
+  --pitch: #163524;
+  --pitch-light: #1F5138;
+  --floodlight: #F2C744;
+  --chalk: #EDF3EE;
+  --card-red: #E4572E;
+  --linha: rgba(237, 243, 238, 0.14);
+  --fonte-titulo: ui-sans-serif, "Segoe UI", Arial, sans-serif;
+  --fonte-numero: ui-monospace, "SFMono-Regular", Consolas, monospace;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  min-height: 100%;
+  background: var(--night);
+  color: var(--chalk);
+  font-family: var(--fonte-titulo);
+  line-height: 1.45;
+}
+
+#app {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 24px 18px 60px;
+}
+
+h1, h2, h3 { font-weight: 700; margin: 0 0 12px; letter-spacing: -0.01em; }
+h2 { font-size: 1.5rem; border-bottom: 1px solid var(--linha); padding-bottom: 10px; }
+h3 { font-size: 1.05rem; color: var(--floodlight); margin-top: 22px; }
+p { margin: 0 0 8px; }
+ul { margin: 0 0 12px; padding-left: 20px; }
+.texto-apoio { color: rgba(237, 243, 238, 0.65); font-size: 0.92rem; }
+.destaque { color: var(--floodlight); font-weight: 600; }
+
+/* ---------- Tela de abertura ------------------------------------------- */
+.tela-abertura {
+  min-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  gap: 40px;
+}
+.abertura-marca .abertura-numero {
+  display: block;
+  font-family: var(--fonte-numero);
+  font-size: 4rem;
+  font-weight: 700;
+  color: var(--floodlight);
+  line-height: 1;
+}
+.abertura-marca h1 { font-size: 2.1rem; margin: 6px 0 4px; }
+.subt { color: rgba(237, 243, 238, 0.7); }
+.abertura-acoes { display: flex; flex-direction: column; gap: 12px; width: 260px; }
+
+/* ---------- Botoes ------------------------------------------------------ */
+.btn {
+  border: none;
+  border-radius: 3px;
+  padding: 12px 18px;
+  font-size: 0.98rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+}
+.btn-primario { background: var(--floodlight); color: #1A1400; }
+.btn-primario:hover { background: #ffd968; }
+.btn-secundario { background: var(--pitch-light); color: var(--chalk); border: 1px solid var(--linha); }
+.btn-secundario:hover { background: #275e42; }
+.btn-perigo { background: transparent; color: var(--card-red); border: 1px solid var(--card-red); }
+.btn-perigo:hover { background: rgba(228, 87, 46, 0.12); }
+
+/* ---------- Formulario de criacao --------------------------------------- */
+.campo { margin-bottom: 16px; display: flex; flex-direction: column; gap: 6px; }
+.campo-linha { display: flex; gap: 16px; }
+.campo-linha .campo { flex: 1; }
+label { font-size: 0.85rem; color: rgba(237, 243, 238, 0.75); }
+input[type="text"], select {
+  background: var(--pitch);
+  border: 1px solid var(--linha);
+  color: var(--chalk);
+  padding: 10px 12px;
+  border-radius: 3px;
+  font-family: inherit;
+  font-size: 0.95rem;
+}
+
+.grade-estilos { display: grid; grid-template-columns: 1fr; gap: 10px; }
+.cartao-estilo {
+  border: 1px solid var(--linha);
+  background: var(--pitch);
+  border-radius: 3px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  cursor: pointer;
+}
+.cartao-estilo input { margin-right: 8px; }
+.cartao-estilo-titulo { font-weight: 700; }
+.cartao-estilo-desc { font-size: 0.85rem; color: rgba(237, 243, 238, 0.65); }
+.cartao-estilo:has(input:checked) { border-color: var(--floodlight); background: var(--pitch-light); }
+
+#btn-confirmar-criacao { width: 100%; margin-top: 8px; }
+
+/* ---------- Cartao do jogador -------------------------------------------- */
+.cartao-jogador {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--pitch);
+  border: 1px solid var(--linha);
+  border-radius: 3px;
+  padding: 16px;
+  margin: 16px 0;
+}
+.cartao-jogador-ovr {
+  font-family: var(--fonte-numero);
+  font-size: 2.4rem;
+  font-weight: 700;
+  color: var(--floodlight);
+  min-width: 64px;
+  text-align: center;
+}
+.cartao-jogador-dados h3 { margin: 0; font-size: 1.15rem; }
+.cartao-jogador-dados p { margin: 2px 0; font-size: 0.9rem; }
+
+/* ---------- Tabela da liga ------------------------------------------------ */
+.tabela-liga {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.86rem;
+  margin: 16px 0;
+}
+.tabela-liga caption {
+  text-align: left;
+  color: rgba(237, 243, 238, 0.7);
+  font-size: 0.82rem;
+  margin-bottom: 6px;
+}
+.tabela-liga th, .tabela-liga td {
+  border-bottom: 1px solid var(--linha);
+  padding: 6px 8px;
+  text-align: center;
+  font-family: var(--fonte-numero);
+}
+.tabela-liga th:nth-child(2), .tabela-liga td:nth-child(2) { text-align: left; font-family: inherit; }
+.tabela-liga .linha-destaque { background: rgba(242, 199, 68, 0.12); }
+
+/* ---------- Barra superior no dashboard ----------------------------------- */
+.barra-topo {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: rgba(237, 243, 238, 0.7);
+  border-bottom: 1px solid var(--linha);
+  padding-bottom: 10px;
+  margin-bottom: 4px;
+}
+.marca { font-family: var(--fonte-numero); letter-spacing: 0.06em; color: var(--floodlight); }
+
+.acoes { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+
+/* ---------- Cartoes de clube (mercado) ------------------------------------ */
+.lista-clubes { display: flex; flex-direction: column; gap: 10px; margin: 16px 0; }
+.cartao-clube {
+  border: 1px solid var(--linha);
+  background: var(--pitch);
+  border-radius: 3px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.cartao-clube-topo { display: flex; justify-content: space-between; align-items: baseline; }
+.tag {
+  font-size: 0.72rem;
+  color: rgba(237, 243, 238, 0.65);
+  border: 1px solid var(--linha);
+  border-radius: 3px;
+  padding: 2px 6px;
+}
+.cartao-clube-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.82rem;
+  color: rgba(237, 243, 238, 0.75);
+  font-family: var(--fonte-numero);
+}
+
+/* ---------- Resultado / avisos --------------------------------------------- */
+.grade-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin: 18px 0;
+}
+.grade-stats div {
+  background: var(--pitch);
+  border: 1px solid var(--linha);
+  border-radius: 3px;
+  padding: 12px 6px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.grade-stats .numero {
+  font-family: var(--fonte-numero);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--floodlight);
+}
+.grade-stats span:last-child { font-size: 0.75rem; color: rgba(237, 243, 238, 0.65); }
+
+.aviso {
+  background: rgba(228, 87, 46, 0.12);
+  border: 1px solid rgba(228, 87, 46, 0.4);
+  border-radius: 3px;
+  padding: 10px 12px;
+  font-size: 0.88rem;
+}
+.aviso-campeao {
+  background: rgba(242, 199, 68, 0.14);
+  border-color: rgba(242, 199, 68, 0.5);
+}
+
+/* ---------- Responsivo ------------------------------------------------------ */
+@media (max-width: 520px) {
+  .campo-linha { flex-direction: column; gap: 16px; }
+  .grade-stats { grid-template-columns: repeat(2, 1fr); }
+  .cartao-jogador { flex-direction: column; align-items: flex-start; }
+}
+
+/* ---------- Foco visivel para acessibilidade -------------------------------- */
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible {
+  outline: 2px solid var(--floodlight);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
