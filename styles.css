@@ -1,0 +1,343 @@
+/* ============================================================
+   Carreira — tema visual "painel de dados" (referência: Football Manager)
+   Paleta: verde-gramado escuro + acentos por contexto (Parte 11 do GDD)
+   ============================================================ */
+
+:root {
+  --bg: #0e1512;
+  --bg-panel: #16211c;
+  --bg-panel-raised: #1c2a23;
+  --line: #2a3a32;
+  --text: #eef4f0;
+  --text-dim: #90a89b;
+  --text-faint: #5e7267;
+
+  --accent-pitch: #3f9142;   /* positivo / aprovação */
+  --accent-pitch-dim: #2c6630;
+  --accent-risk: #c1494b;    /* risco / dispensa / lesão */
+  --accent-legacy: #c99a3f;  /* conquista / legado */
+  --accent-info: #4f7fb0;    /* neutro / tático */
+
+  --font-display: 'Oswald', sans-serif;
+  --font-body: 'Inter', sans-serif;
+
+  --radius: 3px;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+* { box-sizing: inherit; }
+
+html, body {
+  height: 100%;
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+#app {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ---------- Sidebar ---------- */
+
+.sidebar {
+  width: 220px;
+  flex-shrink: 0;
+  background: var(--bg-panel);
+  border-right: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  padding: 20px 0;
+}
+
+.brand {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.1rem;
+  letter-spacing: 0.02em;
+  padding: 0 20px 20px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 12px;
+}
+
+.nav-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  flex: 1;
+}
+
+.nav-item {
+  padding: 11px 20px;
+  font-size: 0.92rem;
+  color: var(--text-dim);
+  cursor: pointer;
+  border-left: 3px solid transparent;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+}
+
+.nav-item:hover { color: var(--text); background: var(--bg-panel-raised); }
+
+.nav-item.active {
+  color: var(--text);
+  border-left-color: var(--accent-pitch);
+  background: var(--bg-panel-raised);
+  font-weight: 600;
+}
+
+.sidebar-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 16px 0;
+  border-top: 1px solid var(--line);
+  margin-top: 12px;
+}
+
+/* ---------- Main / layout base ---------- */
+
+main#main {
+  flex: 1;
+  min-width: 0;
+  padding: 28px 32px 60px;
+  max-width: 1100px;
+}
+
+h1, h2, h3 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  margin: 0 0 4px;
+  letter-spacing: 0.01em;
+}
+
+h1 { font-size: 1.6rem; }
+h2 { font-size: 1.15rem; color: var(--text); }
+h3 { font-size: 0.95rem; color: var(--text-dim); font-weight: 500; }
+
+p { line-height: 1.55; color: var(--text-dim); }
+
+.subtitle { color: var(--text-dim); font-size: 0.9rem; margin-bottom: 24px; }
+
+/* ---------- Panels ---------- */
+
+.panel {
+  background: var(--bg-panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  margin-bottom: 18px;
+}
+
+.panel-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+@media (max-width: 760px) {
+  .panel-grid { grid-template-columns: 1fr; }
+  main#main { padding: 20px 16px 48px; }
+  .sidebar { width: 76px; }
+  .brand span, .sidebar-footer { display: none; }
+  .nav-item { text-align: center; padding: 12px 4px; font-size: 0.72rem; }
+}
+
+/* ---------- Player identity strip ---------- */
+
+.player-strip {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 16px;
+  margin-bottom: 24px;
+}
+
+.player-strip .name {
+  font-family: var(--font-display);
+  font-size: 1.7rem;
+  font-weight: 600;
+}
+
+.player-strip .meta {
+  color: var(--text-dim);
+  font-size: 0.9rem;
+  margin-top: 2px;
+}
+
+.player-strip .phase-tag {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--accent-pitch);
+  border: 1px solid var(--accent-pitch-dim);
+  padding: 4px 10px;
+  border-radius: var(--radius);
+}
+
+/* ---------- Bars (atributos e status) ---------- */
+
+.bar-row {
+  display: grid;
+  grid-template-columns: 110px 1fr 34px;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 0;
+  font-size: 0.85rem;
+}
+
+.bar-row .label { color: var(--text-dim); }
+
+.bar-track {
+  height: 7px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  background: var(--accent-info);
+  transition: width 0.25s ease;
+}
+
+.bar-fill.good { background: var(--accent-pitch); }
+.bar-fill.bad { background: var(--accent-risk); }
+.bar-fill.legacy { background: var(--accent-legacy); }
+
+.bar-row .value { text-align: right; font-variant-numeric: tabular-nums; color: var(--text); }
+
+/* ---------- Buttons ---------- */
+
+button {
+  font-family: var(--font-body);
+  font-size: 0.88rem;
+  border-radius: var(--radius);
+  cursor: pointer;
+  border: 1px solid var(--line);
+}
+
+.btn-primary {
+  background: var(--accent-pitch);
+  border-color: var(--accent-pitch-dim);
+  color: #0b1a0d;
+  font-weight: 600;
+  padding: 11px 20px;
+}
+.btn-primary:hover { background: #46a24a; }
+
+.btn-secondary {
+  background: var(--bg-panel-raised);
+  color: var(--text);
+  padding: 10px 18px;
+}
+.btn-secondary:hover { border-color: var(--accent-info); }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text-dim);
+  padding: 8px 10px;
+  text-align: left;
+}
+.btn-ghost:hover { color: var(--text); background: var(--bg-panel-raised); }
+.btn-danger-ghost:hover { color: var(--accent-risk); }
+
+.choice-btn {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: var(--bg-panel-raised);
+  color: var(--text);
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  border: 1px solid var(--line);
+}
+.choice-btn:hover { border-color: var(--accent-pitch); }
+
+/* ---------- Forms ---------- */
+
+label { display: block; font-size: 0.85rem; color: var(--text-dim); margin: 14px 0 6px; }
+
+input[type=text], select {
+  width: 100%;
+  padding: 10px 12px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 0.92rem;
+}
+
+.choice-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.pill {
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  text-align: center;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+}
+.pill.selected { border-color: var(--accent-pitch); color: var(--text); background: var(--bg-panel-raised); }
+
+/* ---------- Modal (eventos) ---------- */
+
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(6, 10, 8, 0.72);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 50;
+  padding: 20px;
+}
+
+.modal-box {
+  background: var(--bg-panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  max-width: 480px;
+  width: 100%;
+  padding: 24px;
+}
+
+.modal-box .event-tag {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--accent-legacy);
+  margin-bottom: 8px;
+}
+
+/* ---------- Log / histórico ---------- */
+
+.log-entry {
+  border-left: 2px solid var(--line);
+  padding: 4px 0 4px 14px;
+  margin-bottom: 8px;
+  font-size: 0.87rem;
+  color: var(--text-dim);
+}
+.log-entry .season-tag { color: var(--text); font-weight: 600; margin-right: 6px; }
+
+.effect-tag {
+  display: inline-block;
+  font-size: 0.72rem;
+  padding: 1px 6px;
+  border-radius: 3px;
+  margin-left: 6px;
+  border: 1px solid var(--line);
+}
+.effect-tag.up { color: var(--accent-pitch); border-color: var(--accent-pitch-dim); }
+.effect-tag.down { color: var(--accent-risk); }
